@@ -24,10 +24,6 @@ function Header() {
 		({ tabs }: { tabs: { tabs: string[]; active: number } }) => tabs
 	);
 
-	// useEffect(() => {
-	// 	console.log(tabs);
-	// });
-
 	return (
 		<header className="flex flex-row w-full h-8 p-0 m-0 border-b border-black justify-between items-center pr-2 bg-zinc-900">
 			<div className=" flex flex-row p-0 m-0">
