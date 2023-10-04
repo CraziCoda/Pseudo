@@ -12,12 +12,12 @@ export const open_folder = async (): Promise<string | null> => {
 	return selected as string | null;
 };
 
-export const get_files = async (path: string): Promise<string[]> => {
+export const get_files = async (path: string): Promise<string[]> => { 
 	const tauri_fs = await import("@tauri-apps/api/fs");
 	const entries = await tauri_fs.readDir(path);
 	const files: string[] = [];
 	for (const entry of entries) {
-		console.log(entry.name);
+		// console.log(entry.name);
 		if (entry.name?.endsWith(".psc")) files.push(entry.name);
 	}
 

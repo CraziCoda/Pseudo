@@ -1,7 +1,7 @@
 import { get_files } from "@/functions/folder";
 import { createSlice } from "@reduxjs/toolkit";
 
-interface IFolderSlice {
+export interface IFolderSlice {
 	path: string | null;
 	files: string[];
 }
@@ -17,14 +17,13 @@ const folderSlice = createSlice({
 	reducers: {
 		set_folder: (state, { payload }: { payload: string }) => {
 			state.path = payload;
-			const results = get_files(payload);
-			results.then((files) => {
-				state.files = [...files];
-			});
+		},
+		set_files: (state, { payload }: { payload: string[] }) => {
+			state.files = [...payload];
 		},
 	},
 });
 
-export const { set_folder } = folderSlice.actions;
+export const { set_folder, set_files } = folderSlice.actions;
 
 export default folderSlice.reducer;

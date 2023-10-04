@@ -6,7 +6,7 @@ interface ITabsSlice {
 }
 
 const iniitialState: ITabsSlice = {
-	tabs: ["default", "page.pcs", "page1.pcs"],
+	tabs: ["default"],
 	active: 0,
 };
 
@@ -60,7 +60,7 @@ const tabsSlice = createSlice({
 		 * @param payload is the index of the tab to close
 		 */
 		openTab: (state, { payload }: { payload: number }) => {
-			console.log("Open");
+			// console.log("Open");
 			state.active = payload;
 		},
 	},

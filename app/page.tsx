@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { IoMdClose } from "react-icons/io";
 import { BsPlay } from "react-icons/bs";
 import CodeEditor from "@/components/Editor";
+import { basename } from "path";
 
 export default function Main() {
 	return (
@@ -28,7 +29,14 @@ function Header() {
 		<header className="flex flex-row w-full h-8 p-0 m-0 border-b border-black justify-between items-center pr-2 bg-zinc-900">
 			<div className=" flex flex-row p-0 m-0">
 				{tabs.tabs?.map((val, i) => {
-					return <Tab name={val} index={i} active={tabs.active == i} key={i} />;
+					return (
+						<Tab
+							name={basename(val)}
+							index={i}
+							active={tabs.active == i}
+							key={i}
+						/>
+					);
 				})}
 			</div>
 			<div className=" flex flex-row">
