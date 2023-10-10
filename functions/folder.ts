@@ -12,7 +12,7 @@ export const open_folder = async (): Promise<string | null> => {
 	return selected as string | null;
 };
 
-export const get_files = async (path: string): Promise<string[]> => { 
+export const get_files = async (path: string): Promise<string[]> => {
 	const tauri_fs = await import("@tauri-apps/api/fs");
 	const entries = await tauri_fs.readDir(path);
 	const files: string[] = [];
@@ -24,9 +24,20 @@ export const get_files = async (path: string): Promise<string[]> => {
 	return files;
 };
 
-
 export const create_file = async (name: string): Promise<boolean> => {
-    const tauri_api = await import("@tauri-apps/api");
+	const tauri_api = await import("@tauri-apps/api");
 
-    return true;
-}
+	return true;
+};
+
+export const read_file = async (path: string): Promise<string | null> => {
+	const tauri_api = await import("@tauri-apps/api");
+
+	try {
+		const text = await tauri_api.fs.readTextFile(path);
+		return text;
+	} catch (err) {
+		// log error
+		return null;
+	}
+};

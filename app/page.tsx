@@ -1,20 +1,48 @@
 "use client";
-import { closeTab, openTab } from "@/redux/reducers/tabs";
-import { useEffect } from "react";
+import {
+	ITab,
+	closeTab,
+	editContent,
+	openTab,
+	saveContent,
+} from "@/redux/reducers/tabs";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IoMdClose } from "react-icons/io";
-import { BsPlay } from "react-icons/bs";
+import { BsPlay, BsDot } from "react-icons/bs";
 import CodeEditor from "@/components/Editor";
 import { basename } from "path";
+import { read_file } from "@/functions/folder";
 
 export default function Main() {
+	const dispatch = useDispatch();
+
+	const tabs = useSelector(
+		({ tabs }: { tabs: { tabs: ITab[]; active: number } }) => tabs
+	);
+
+	async function handle_read_file(path: string) {
+		const text = await read_file(path);
+		if (text) {
+			dispatch(editContent(text));
+			dispatch(saveContent());
+		}
+	}
+
+	useEffect(() => {
+		const file_path = tabs.tabs[tabs.active].path;
+		handle_read_file(file_path);
+		// console.log(tabs.tabs[tabs.active]);
+	}, [tabs.active]);
+
 	return (
 		<main className="flex h-screen w-full flex-col bg-zinc-800">
 			<>
 				<Header />
 			</>
 			<div className="flex h-full">
-				<CodeEditor />
+            {/* This should work for now */}
+				{tabs.tabs[tabs.active].path == "default" ? "" : <CodeEditor />}
 			</div>
 		</main>
 	);
@@ -22,7 +50,7 @@ export default function Main() {
 
 function Header() {
 	const tabs = useSelector(
-		({ tabs }: { tabs: { tabs: string[]; active: number } }) => tabs
+		({ tabs }: { tabs: { tabs: ITab[]; active: number } }) => tabs
 	);
 
 	return (
@@ -31,10 +59,11 @@ function Header() {
 				{tabs.tabs?.map((val, i) => {
 					return (
 						<Tab
-							name={basename(val)}
+							name={basename(val.path)}
 							index={i}
 							active={tabs.active == i}
 							key={i}
+							saved={val.saved}
 						/>
 					);
 				})}
@@ -50,9 +79,10 @@ interface TabProps {
 	active?: boolean;
 	name: string;
 	index: number;
+	saved?: boolean;
 }
 
-function Tab({ active, name, index }: TabProps) {
+function Tab({ active, name, index, saved }: TabProps) {
 	const dispatch = useDispatch();
 
 	return (
@@ -74,7 +104,11 @@ function Tab({ active, name, index }: TabProps) {
 					dispatch(closeTab(index));
 				}}
 			>
-				<IoMdClose size={12} color="white" />
+				{saved ? (
+					<IoMdClose size={12} color="white" />
+				) : (
+					<BsDot size={24} color="white" />
+				)}
 			</div>
 		</div>
 	);

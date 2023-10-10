@@ -1,0 +1,3 @@
+show circle if unsaved *
+work on the default tab
+show option to folder when unavailable

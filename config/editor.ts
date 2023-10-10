@@ -61,3 +61,8 @@ export const editor_theme: editor.IStandaloneThemeData = {
 	inherit: true,
 	colors: {},
 };
+
+type monaco =
+	typeof import("/home/killcode/Documents/projects/pseudo/node_modules/monaco-editor/esm/vs/editor/editor.api");
+
+export function add_editor_commands(monaco: monaco) {}

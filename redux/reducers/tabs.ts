@@ -1,12 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+export interface ITab {
+	path: string;
+	saved?: boolean;
+	content?: string;
+}
+
 interface ITabsSlice {
-	tabs: string[];
+	tabs: ITab[];
 	active: number;
 }
 
 const iniitialState: ITabsSlice = {
-	tabs: ["default"],
+	tabs: [{ path: "default", saved: true }],
 	active: 0,
 };
 
@@ -21,14 +27,14 @@ const tabsSlice = createSlice({
 		closeTab: (state, { payload }: { payload: number }) => {
 			if (payload == state.active) {
 				if (payload == 0 && state.tabs.length > 1) {
-					state.tabs.splice(payload, 1);  
+					state.tabs.splice(payload, 1);
 				} else if (payload == state.tabs.length - 1 && state.tabs.length > 1) {
 					state.active -= 1;
 					state.tabs.splice(payload, 1);
 				} else if (state.tabs.length == 1) {
 					state.tabs.splice(payload, 1);
-					state.active = -1;
-                    state.tabs = ['blank']
+					state.active = 0;
+					state.tabs = [{ path: "default", saved: true }];
 				} else {
 					state.tabs.splice(payload, 1);
 				}
@@ -46,9 +52,11 @@ const tabsSlice = createSlice({
 		 * adds a new tab to main window
 		 * @param payload it is the path to the file to be add
 		 */
-		addTab: (state, { payload }: { payload: string }) => {
-			if (state.tabs.includes(payload)) {
-				state.active = state.tabs.indexOf(payload);
+		addTab: (state, { payload }: { payload: ITab }) => {
+			const index = state.tabs.findIndex((tab) => tab.path == payload.path);
+
+			if (index != -1) {
+				state.active = index;
 				return;
 			}
 			state.tabs.push(payload);
@@ -63,9 +71,22 @@ const tabsSlice = createSlice({
 			// console.log("Open");
 			state.active = payload;
 		},
+
+		editContent: (state, { payload }: { payload: string }) => {
+			state.tabs[state.active].content = payload;
+			state.tabs[state.active].saved = false;
+		},
+
+		saveContent: (state) => {
+			state.tabs[state.active].saved = true;
+		},
 	},
 });
 
-export const { closeTab, openTab, addTab } = tabsSlice.actions;
+export const { closeTab, openTab, addTab, editContent, saveContent } =
+	tabsSlice.actions;
 
 export default tabsSlice.reducer;
+function err(reason: any): PromiseLike<never> {
+	throw new Error("Function not implemented.");
+}

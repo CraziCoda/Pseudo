@@ -3,6 +3,7 @@
 import store from "@/redux/store/app";
 import "./globals.css";
 import { Provider } from "react-redux";
+import Adjuster from "@/components/Adjuster";
 
 export default function RootLayout({
 	children,
@@ -21,6 +22,7 @@ export default function RootLayout({
 				<Provider store={store}>
 					{activitybar}
 					{primarysidebar}
+                    {/* <Adjuster direction="vertical"/> */}
 					{children}
 					{secondarysidebar}
 				</Provider>

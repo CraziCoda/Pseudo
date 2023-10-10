@@ -11,7 +11,7 @@ import { join, basename } from "path";
 
 export default function PrimarySideBar() {
 	return (
-		<div className="flex flex-col w-52 border-r border-r-black bg-zinc-900">
+		<div className="flex flex-col w-72 border-r border-r-black bg-zinc-900">
 			<div className="flex flex-row h-8 items-center pl-2 text-xs text-white">
 				PROJECTS
 			</div>
@@ -40,36 +40,35 @@ function Project() {
 				dispatch(set_files(files));
 			}
 		});
-
-		await listen("new_folder", async (event) => {});
 	}
 
 	return (
-		<div className="flex flex-col cursor-pointer select-none text-white text-sm ">
-            {
-                folder.path ? <>
-				<div
-					className="flex flex-row  ml-2 mr-2"
-					onClick={() => setShowList(!showList)}
-				>
-					{showList ? (
-						<IoMdArrowDropdown size={22} color="white" />
-					) : (
-						<IoMdArrowDropright size={22} color="white" />
-					)}
+		<div className="flex flex-col cursor-pointer select-none text-white text-sm">
+			{folder.path ? (
+				<>
+					<div
+						className="flex flex-row  ml-2 mr-2"
+						onClick={() => setShowList(!showList)}
+					>
+						{showList ? (
+							<IoMdArrowDropdown size={22} color="white" />
+						) : (
+							<IoMdArrowDropright size={22} color="white" />
+						)}
 
-					<span className="font-semibold text-base">
-						{basename(folder.path || "")}
-					</span>
-				</div>
-				<ul className={` ${showList ? "" : "hidden"}`}>
-					{folder.files.map((file, i) => {
-						return <File path={join(folder.path as string, file)} key={i} />;
-					})}
-				</ul>
-			</> : 'No folder opened'
-            }
-			
+						<span className="font-semibold text-base">
+							{basename(folder.path || "")}
+						</span>
+					</div>
+					<ul className={` ${showList ? "" : "hidden"}`}>
+						{folder.files.map((file, i) => {
+							return <File path={join(folder.path as string, file)} key={i} />;
+						})}
+					</ul>
+				</>
+			) : (
+				"No folder opened"
+			)}
 		</div>
 	);
 }
@@ -80,7 +79,7 @@ function File({ path }: { path: string }) {
 		<li
 			className="pl-6 hover:bg-zinc-700 w-full"
 			onClick={() => {
-				dispatch(addTab(path));
+				dispatch(addTab({ path }));
 			}}
 		>
 			<span>{basename(path)}</span>
