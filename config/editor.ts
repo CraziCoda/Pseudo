@@ -47,6 +47,7 @@ export const lang_tokens: languages.IMonarchLanguage = {
 			],
 			[/".*?"/, "string"],
 			[/\/\/(.+)/, "comment"],
+            [/[+-]?\d+(\.\d+)?/g, 'number']
 		],
 	},
 	ignoreCase: true,
@@ -57,6 +58,7 @@ export const editor_theme: editor.IStandaloneThemeData = {
 	rules: [
 		{ token: "keyword", fontStyle: "bold", foreground: "#dd0000" },
 		{ token: "comment", foreground: "#888888" },
+        {token:'number', foreground: "#33ff33"}
 	],
 	inherit: true,
 	colors: {},

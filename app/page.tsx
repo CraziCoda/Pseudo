@@ -41,7 +41,7 @@ export default function Main() {
 				<Header />
 			</>
 			<div className="flex h-full">
-            {/* This should work for now */}
+				{/* This should work for now */}
 				{tabs.tabs[tabs.active].path == "default" ? "" : <CodeEditor />}
 			</div>
 		</main>

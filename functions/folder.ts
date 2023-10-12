@@ -24,10 +24,18 @@ export const get_files = async (path: string): Promise<string[]> => {
 	return files;
 };
 
-export const create_file = async (name: string): Promise<boolean> => {
-	const tauri_api = await import("@tauri-apps/api");
+export const create_file = async (path: string): Promise<boolean> => {
+	const tauri_fs = await import("@tauri-apps/api/fs");
 
-	return true;
+	if (await tauri_fs.exists(path)) return false;
+
+	try {
+		await tauri_fs.writeFile(path, "// start coding");
+		return true;
+	} catch (err) {
+		console.log(err);
+		return false;
+	}
 };
 
 export const read_file = async (path: string): Promise<string | null> => {
@@ -40,4 +48,14 @@ export const read_file = async (path: string): Promise<string | null> => {
 		// log error
 		return null;
 	}
+};
+
+export const delete_file = async (path: string): Promise<boolean> => {
+	const tauri_fs = await import("@tauri-apps/api/fs");
+
+	if (await tauri_fs.exists(path)) {
+		tauri_fs.removeFile(path);
+		return true;
+	}
+	return false;
 };

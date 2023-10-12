@@ -1,3 +1,10 @@
 show circle if unsaved *
-work on the default tab
-show option to folder when unavailable
+work on the default tab *
+show option to open folder when unavailable *
+make files selectable *
+add functions delete file *
+add function to add new file * 
+highlight numbers in monaco *
+start trials on a basic compiler
+fix the issue with resizing
+make the tabs pane scrollable
