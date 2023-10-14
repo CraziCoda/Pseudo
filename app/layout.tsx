@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body className="flex flex-row w-full justify-normal select-none">
+			<body className="flex flex-row w-full justify-start select-none">
 				<Provider store={store}>
 					{activitybar}
 					{primarysidebar}

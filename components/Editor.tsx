@@ -20,7 +20,7 @@ export default function CodeEditor() {
 
 	async function save_file() {
 		const tauri_fs = import("@tauri-apps/api/fs");
-		console.log(tabs.tabs[tabs.active].path, tabs.active);
+		// console.log(tabs.tabs[tabs.active].path, tabs.active);
 		try {
 			(await tauri_fs).writeFile(
 				tabs.tabs[tabs.active].path,
@@ -34,7 +34,8 @@ export default function CodeEditor() {
 	function handleEditorWillMount(
 		monaco: typeof import("/home/killcode/Documents/projects/pseudo/node_modules/monaco-editor/esm/vs/editor/editor.api")
 	) {
-		console.log("Will mount");
+		// console.log("Will mount");
+
 		monaco.languages.register({ id: "pseudocode" });
 		monaco.languages.setMonarchTokensProvider("pseudocode", lang_tokens);
 		monaco.editor.defineTheme("pseudocode-theme", editor_theme);
@@ -62,6 +63,9 @@ export default function CodeEditor() {
 			beforeMount={handleEditorWillMount}
 			theme="pseudocode-theme"
 			value={tabs.tabs[tabs.active].content}
+			options={{
+				automaticLayout: true,
+			}}
 			onChange={(text) => {
 				if (text) {
 					dispatch(editContent(text));

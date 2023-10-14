@@ -10,7 +10,7 @@ export default function ActivityBar() {
 function Activity() {
 	return (
 		<div>
-			<div className="flex items-center justify-center w-full h-10 border-l border-l-red-400 cursor-pointer">
+			<div className="flex justify-center w-full h-10 border-l border-l-red-400 cursor-pointer">
 				<AiOutlineFile size={24} color="white" />
 			</div>
 		</div>

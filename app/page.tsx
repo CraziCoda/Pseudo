@@ -40,7 +40,7 @@ export default function Main() {
 			<>
 				<Header />
 			</>
-			<div className="flex h-full">
+			<div className="flex h-full" style={{ width: "99%" }}>
 				{/* This should work for now */}
 				{tabs.tabs[tabs.active].path == "default" ? "" : <CodeEditor />}
 			</div>
@@ -68,8 +68,8 @@ function Header() {
 					);
 				})}
 			</div>
-			<div className=" flex flex-row">
-				<BsPlay size={18} color="white" className="cursor-pointer" />
+			<div className="flex flex-row">
+				<BsPlay size={20} color="white" className="cursor-pointer" />
 			</div>
 		</header>
 	);

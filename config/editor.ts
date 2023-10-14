@@ -56,7 +56,7 @@ export const lang_tokens: languages.IMonarchLanguage = {
 export const editor_theme: editor.IStandaloneThemeData = {
 	base: "vs-dark",
 	rules: [
-		{ token: "keyword", fontStyle: "bold", foreground: "#dd0000" },
+		{ token: "keyword", fontStyle: "bold", foreground: "#ff7777" },
 		{ token: "comment", foreground: "#888888" },
         {token:'number', foreground: "#33ff33"}
 	],
