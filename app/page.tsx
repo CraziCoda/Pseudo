@@ -13,6 +13,10 @@ import { BsPlay, BsDot } from "react-icons/bs";
 import CodeEditor from "@/components/Editor";
 import { basename } from "path";
 import { read_file } from "@/functions/folder";
+import {
+	generate_instructions,
+	run_instructions,
+} from "@/redux/reducers/interpreter";
 
 export default function Main() {
 	const dispatch = useDispatch();
@@ -53,6 +57,18 @@ function Header() {
 		({ tabs }: { tabs: { tabs: ITab[]; active: number } }) => tabs
 	);
 
+	const dispatch = useDispatch();
+
+	function execute() {
+		const active_tab = tabs.tabs[tabs.active];
+
+		if (active_tab.content) {
+			dispatch(generate_instructions(active_tab.content));
+
+			dispatch(run_instructions());
+		}
+	}
+
 	return (
 		<header className="flex flex-row w-full h-8 p-0 m-0 border-b border-black justify-between items-center pr-2 bg-zinc-900">
 			<div className=" flex flex-row p-0 m-0">
@@ -69,7 +85,12 @@ function Header() {
 				})}
 			</div>
 			<div className="flex flex-row">
-				<BsPlay size={20} color="white" className="cursor-pointer" />
+				<BsPlay
+					size={20}
+					color="white"
+					className="cursor-pointer"
+					onClick={execute}
+				/>
 			</div>
 		</header>
 	);
