@@ -19,7 +19,7 @@ export interface CommandI {
 	line: number;
 }
 
-type data_type_t =
+export type data_type_t =
 	| "integer"
 	| "string"
 	| "double"
@@ -28,7 +28,7 @@ type data_type_t =
 	| "boolean"
 	| "char";
 
-export const pseudo_data_type = [
+export const pseudo_data_type: data_type_t[] = [
 	"integer",
 	"string",
 	"double",
@@ -39,11 +39,15 @@ export const pseudo_data_type = [
 ];
 
 export const identifier_regex = /^[a-zA-Z_]\w*$/;
+export const number_regex = /[+-]?\d+(\.\d+)?/g;
+export const integer_regex = /^-?\d+$/;
+export const float_regex = /-?\d+\.\d+$/;
+export const string_regex = /(['"])(.*?)\1$/g;
 
 export interface VariableI {
 	readonly name: string;
 	value: any;
-	type: string;
+	type: data_type_t;
 	scope?: string;
 }
 
@@ -113,7 +117,7 @@ export function select_function(
 ) {
 	switch (action) {
 		case "output":
-			print_to_screen();
+			print_to_screen(args);
 			break;
 		case "input":
 			break;

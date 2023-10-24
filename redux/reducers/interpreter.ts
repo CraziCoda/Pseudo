@@ -56,7 +56,11 @@ const interpreterSlice = createSlice({
 				const command = state.executable[state.program_counter];
 				select_function(command.operation, command.args, state.variables);
 				state.program_counter++;
-                 console.log(state.variables.length)
+				// console.log(state.variables);
+
+				// state.variables.forEach((val) => {
+				// 	console.log(val);
+				// });
 			}
 		},
 	},

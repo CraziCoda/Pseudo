@@ -18,7 +18,7 @@ export const lang_tokens: languages.IMonarchLanguage = {
 					},
 				},
 			],
-			[/".*?"/, "string"],
+			[/(['"])(.*?)\1/, "string"],
 			[/\/\/(.+)/, "comment"],
 			[/[+-]?\d+(\.\d+)?/g, "number"],
 		],
