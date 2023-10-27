@@ -90,6 +90,33 @@ export function declare_variable(
 	store.dispatch(add_variables(pseudo_vars));
 }
 
+export function detect_data_type(data: string): data_type_t | null {
+	if (string_regex.test(data)) return "string";
+	else if (integer_regex.test(data)) return "integer";
+	else if (float_regex.test(data)) return "float";
+	else if (data.toLowerCase() == "true" || data.toLowerCase() == "false")
+		return "bool";
+	return null;
+}
+
+function assign_to_incoming_data_type(identifier: string, value: any) {
+	const data_type = detect_data_type(value);
+
+	if (data_type == "integer") value = parseInt(value);
+	else if (data_type == "float") value = parseFloat(value);
+	else if (value.toLowerCase() == "true" || value.toLowerCase() == "false")
+		value = value.toLowerCase() == "true" || false;
+
+	if (data_type)
+		store.dispatch(
+			assign_variable({
+				name: identifier,
+				type: data_type,
+				value: value,
+			})
+		);
+}
+
 export function variable_assignment(args: string) {
 	const args_s = args.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
 
@@ -116,8 +143,13 @@ export function variable_assignment(args: string) {
 					pseudo_var.type == "double"
 				)
 					store.dispatch(
-						assign_variable({ name: identifier, type: "integer", value })
+						assign_variable({
+							name: identifier,
+							type: "integer",
+							value: parseInt(value),
+						})
 					);
+				else assign_to_incoming_data_type(identifier, value);
 			} else if (float_regex.test(value)) {
 				if (
 					pseudo_var.type == "integer" ||
@@ -125,8 +157,13 @@ export function variable_assignment(args: string) {
 					pseudo_var.type == "double"
 				)
 					store.dispatch(
-						assign_variable({ name: identifier, type: "float", value })
+						assign_variable({
+							name: identifier,
+							type: "float",
+							value: parseFloat(value),
+						})
 					);
+				else assign_to_incoming_data_type(identifier, value);
 			} else if (string_regex.test(value)) {
 				if (pseudo_var.type == "string")
 					store.dispatch(
@@ -136,27 +173,22 @@ export function variable_assignment(args: string) {
 							value: value.substring(1, value.length - 1),
 						})
 					);
+				else assign_to_incoming_data_type(identifier, value);
 			} else if (
 				value.toLowerCase() == "false" ||
 				value.toLowerCase() == "true"
 			) {
-				if (pseudo_var.type == "bool" || pseudo_var.type == "boolean")
-					if (value.toLowerCase() == "true")
+				if (value.toLowerCase() == "true" || value.toLowerCase() == "false") {
+					if (pseudo_var.type == "bool" || pseudo_var.type == "boolean")
 						store.dispatch(
 							assign_variable({
 								name: identifier,
 								type: "bool",
-								value: true,
+								value: value.toLowerCase() == "true" || false,
 							})
 						);
-					else if (value.toLowerCase() == "false")
-						store.dispatch(
-							assign_variable({
-								name: identifier,
-								type: "bool",
-								value: false,
-							})
-						);
+					else assign_to_incoming_data_type(identifier, value);
+				}
 			}
 		} else {
 			// no value error
@@ -239,8 +271,6 @@ export function print_to_screen(args: string) {
 		} else {
 		}
 	});
-
-	// console.log(print_values);
 
 	const output: list_type = {
 		type: "output",

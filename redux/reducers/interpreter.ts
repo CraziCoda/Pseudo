@@ -74,6 +74,8 @@ const interpreterSlice = createSlice({
 				variable.value = payload.value;
 				variable.type = payload.type;
 			}
+
+			console.log(variable?.name, variable?.type, variable?.value);
 		},
 	},
 });
