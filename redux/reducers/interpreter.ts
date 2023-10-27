@@ -1,6 +1,7 @@
 import {
 	CommandI,
 	VariableI,
+	data_type_t,
 	get_keyword_type,
 	idenitfy_token,
 	pseudo_keyword_type,
@@ -51,16 +52,27 @@ const interpreterSlice = createSlice({
 			});
 		},
 
-		run_instructions: (state) => {
-			while (state.program_counter < state.executable.length) {
-				const command = state.executable[state.program_counter];
-				select_function(command.operation, command.args, state.variables);
-				state.program_counter++;
-				// console.log(state.variables);
+		move_program_counter: (state, { payload }: { payload: number }) => {
+			state.program_counter = payload;
+		},
 
-				// state.variables.forEach((val) => {
-				// 	console.log(val);
-				// });
+		add_variables: (state, { payload }: { payload: VariableI[] }) => {
+			state.variables.push(...payload);
+		},
+
+		add_variable: (state, { payload }: { payload: VariableI }) => {
+			state.variables.push(payload);
+		},
+
+		assign_variable: (
+			state,
+			{ payload }: { payload: { name: string; value: any; type: data_type_t } }
+		) => {
+			const variable = state.variables.find((val) => val.name == payload.name);
+
+			if (variable) {
+				variable.value = payload.value;
+				variable.type = payload.type;
 			}
 		},
 	},
@@ -115,6 +127,11 @@ function decode_instructions(index: number, line: string): CommandI | void {
 	}
 }
 
-export const { generate_instructions, run_instructions } =
-	interpreterSlice.actions;
+export const {
+	generate_instructions,
+	move_program_counter,
+	add_variables,
+	add_variable,
+	assign_variable,
+} = interpreterSlice.actions;
 export default interpreterSlice.reducer;

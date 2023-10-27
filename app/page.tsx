@@ -13,10 +13,8 @@ import { BsPlay, BsDot } from "react-icons/bs";
 import CodeEditor from "@/components/Editor";
 import { basename } from "path";
 import { read_file } from "@/functions/folder";
-import {
-	generate_instructions,
-	run_instructions,
-} from "@/redux/reducers/interpreter";
+import { generate_instructions } from "@/redux/reducers/interpreter";
+import { execute_instructions } from "@/interpreter/program";
 
 export default function Main() {
 	const dispatch = useDispatch();
@@ -44,10 +42,11 @@ export default function Main() {
 			<>
 				<Header />
 			</>
-			<div className="flex h-full" style={{ width: "99%" }}>
+			<div className="flex h-4/6" style={{ width: "99%" }}>
 				{/* This should work for now */}
 				{tabs.tabs[tabs.active].path == "default" ? "" : <CodeEditor />}
 			</div>
+			<Footer />
 		</main>
 	);
 }
@@ -65,7 +64,7 @@ function Header() {
 		if (active_tab.content) {
 			dispatch(generate_instructions(active_tab.content));
 
-			dispatch(run_instructions());
+			execute_instructions();
 		}
 	}
 
@@ -93,6 +92,14 @@ function Header() {
 				/>
 			</div>
 		</header>
+	);
+}
+
+function Footer() {
+	return (
+		<div className="flex border-t border-t-black h-2/6 text-white pl-5 pt-2">
+			Hello world
+		</div>
 	);
 }
 
