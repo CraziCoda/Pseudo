@@ -14,4 +14,4 @@ fix load not loading on initial open
 code to read linear code
 fix assigment when there is no space to separare them eg. a=10
 
-take run_program from the reducer and execute it outside
+take run_program from the reducer and execute it outside *

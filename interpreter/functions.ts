@@ -14,6 +14,7 @@ import {
 	add_variables,
 	assign_variable,
 } from "@/redux/reducers/interpreter";
+import { add_to_list, list_type } from "@/redux/reducers/terminal";
 
 export function declare_variable(
 	args: string
@@ -237,9 +238,14 @@ export function print_to_screen(args: string) {
 			}
 		} else {
 		}
-
-		console.log(print_values);
 	});
 
-	console.log(print_values);
+	// console.log(print_values);
+
+	const output: list_type = {
+		type: "output",
+		values: print_values,
+	};
+
+	store.dispatch(add_to_list(output));
 }

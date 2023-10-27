@@ -15,6 +15,7 @@ import { basename } from "path";
 import { read_file } from "@/functions/folder";
 import { generate_instructions } from "@/redux/reducers/interpreter";
 import { execute_instructions } from "@/interpreter/program";
+import { ITerminalSlice, clear_terminal } from "@/redux/reducers/terminal";
 
 export default function Main() {
 	const dispatch = useDispatch();
@@ -62,6 +63,8 @@ function Header() {
 		const active_tab = tabs.tabs[tabs.active];
 
 		if (active_tab.content) {
+			dispatch(saveContent());
+            dispatch(clear_terminal());
 			dispatch(generate_instructions(active_tab.content));
 
 			execute_instructions();
@@ -96,9 +99,15 @@ function Header() {
 }
 
 function Footer() {
+	const terminal = useSelector(
+		({ terminal }: { terminal: ITerminalSlice }) => terminal
+	);
+
 	return (
-		<div className="flex border-t border-t-black h-2/6 text-white pl-5 pt-2">
-			Hello world
+		<div className="flex flex-col border-t border-t-black h-2/6 text-white pl-5 pt-2 text-sm bg-zinc-900">
+			{terminal.list.map((val, i) => (
+				<div key={i}>{val.values.join(" ")}</div>
+			))}
 		</div>
 	);
 }
