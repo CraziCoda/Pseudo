@@ -46,6 +46,11 @@ const interpreterSlice = createSlice({
 				// excess spaces
 				line = line.replace(/\s+/g, " ");
 
+				// seperate combined characters
+				line = line.replace(/([^\w"]+)|(["][^"]*["])/g, " $1$2 ");
+
+				console.log(line);
+
 				const command = decode_instructions(index, line);
 
 				if (command) state.executable.push(command);
