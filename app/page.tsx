@@ -6,16 +6,25 @@ import {
 	openTab,
 	saveContent,
 } from "@/redux/reducers/tabs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IoMdClose } from "react-icons/io";
-import { BsPlay, BsDot } from "react-icons/bs";
+import { BsPlay, BsDot, BsBasket } from "react-icons/bs";
 import CodeEditor from "@/components/Editor";
 import { basename } from "path";
 import { read_file } from "@/functions/folder";
-import { generate_instructions } from "@/redux/reducers/interpreter";
+import {
+	assign_variable,
+	generate_instructions,
+	uninterrupt_program,
+} from "@/redux/reducers/interpreter";
 import { execute_instructions } from "@/interpreter/program";
-import { ITerminalSlice, clear_terminal } from "@/redux/reducers/terminal";
+import {
+	ITerminalSlice,
+	change_current_input_to_output,
+	clear_terminal,
+} from "@/redux/reducers/terminal";
+import { input_assignment, variable_assignment } from "@/interpreter/functions";
 
 export default function Main() {
 	const dispatch = useDispatch();
@@ -63,8 +72,8 @@ function Header() {
 		const active_tab = tabs.tabs[tabs.active];
 
 		if (active_tab.content) {
+			dispatch(clear_terminal());
 			dispatch(saveContent());
-            dispatch(clear_terminal());
 			dispatch(generate_instructions(active_tab.content));
 
 			execute_instructions();
@@ -99,15 +108,65 @@ function Header() {
 }
 
 function Footer() {
+	const input_ref = useRef<HTMLInputElement | null>(null);
+	const terminal_ref = useRef<HTMLDivElement | null>(null);
+	const dispatch = useDispatch();
+
 	const terminal = useSelector(
 		({ terminal }: { terminal: ITerminalSlice }) => terminal
 	);
 
+	useEffect(() => {
+		terminal_ref.current?.click();
+	}, [terminal]);
+
 	return (
-		<div className="flex flex-col border-t border-t-black h-2/6 text-white pl-5 pt-2 text-sm bg-zinc-900">
-			{terminal.list.map((val, i) => (
-				<div key={i}>{val.values.join(" ")}</div>
-			))}
+		<div
+			ref={terminal_ref}
+			className="flex flex-col border-t border-t-black h-2/6 text-white pl-5 pr-5 pt-2 text-sm bg-zinc-900 overflow-y-auto"
+			onClick={() => {
+				input_ref.current?.focus();
+			}}
+		>
+			{terminal.list.map((val, i) => {
+				console.log(val);
+				return val.type == "output" ? (
+					<div key={i}>{val.values.join(" ")}</div>
+				) : (
+					<div key={i}>
+						<input
+							ref={input_ref}
+							className="flex w-full cursor-default bg-transparent outline-none"
+							onKeyDown={(e) => {
+								if (e.key == "Enter") {
+									const inputs = input_ref.current?.value.split(" ") || [];
+
+									if (val.values.length == 1) {
+										input_assignment(
+											`${val.values[0]} ${input_ref.current?.value}`
+										);
+									} else {
+										val.values.forEach((value, i, arr) => {
+											if (i < inputs.length) {
+												input_assignment(`${value} ${inputs[i]}`);
+											} else {
+												input_assignment(`${value} ""`);
+											}
+										});
+									}
+
+									// e.currentTarget.readOnly = true;
+									dispatch(uninterrupt_program());
+									dispatch(
+										change_current_input_to_output(e.currentTarget.value)
+									);
+									execute_instructions();
+								}
+							}}
+						/>
+					</div>
+				);
+			})}
 		</div>
 	);
 }

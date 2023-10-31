@@ -13,6 +13,7 @@ import {
 	add_variable,
 	add_variables,
 	assign_variable,
+	interrupt_program,
 } from "@/redux/reducers/interpreter";
 import { add_to_list, list_type } from "@/redux/reducers/terminal";
 
@@ -26,8 +27,8 @@ export function declare_variable(
 	const current_scope = store.getState().interpreter.current_scope;
 	const current_variables = store.getState().interpreter.variables;
 
-	const type_v = args_s.pop() || "";
-	const as_keyword = args_s.pop();
+	const type_v = args_s.pop()?.toLowerCase() || "";
+	const as_keyword = args_s.pop()?.toLowerCase();
 
 	const variables_s = args_s.join("");
 
@@ -106,6 +107,7 @@ function assign_to_incoming_data_type(identifier: string, value: any) {
 	else if (data_type == "float") value = parseFloat(value);
 	else if (value.toLowerCase() == "true" || value.toLowerCase() == "false")
 		value = value.toLowerCase() == "true" || false;
+	else if (data_type == "string") value = value.substring(1, value.length - 1);
 
 	if (data_type)
 		store.dispatch(
@@ -115,6 +117,20 @@ function assign_to_incoming_data_type(identifier: string, value: any) {
 				value: value,
 			})
 		);
+}
+
+export function input_assignment(args: string) {
+	const identifier = args.split(" ")[0];
+
+	const var_values = args.substring(identifier.length, args.length).trim();
+
+	if (integer_regex.test(var_values)) {
+		variable_assignment(`${identifier} ${parseInt(var_values)}`);
+	} else if (float_regex.test(var_values)) {
+		variable_assignment(`${identifier} ${parseFloat(var_values)}`);
+	} else {
+		variable_assignment(`${identifier} ${'"' + var_values + '"'}`);
+	}
 }
 
 export function variable_assignment(args: string) {
@@ -130,10 +146,10 @@ export function variable_assignment(args: string) {
 	// remove identifyier
 	const identifier = args_s.shift() as string;
 
-	const value = args_s.join("");
+	const value = args_s.join("").trim();
 
 	if (pseudo_var != undefined) {
-		//edit variable if it is availab
+		//edit variable if it is available
 
 		if (value != "") {
 			if (integer_regex.test(value)) {
@@ -278,4 +294,26 @@ export function print_to_screen(args: string) {
 	};
 
 	store.dispatch(add_to_list(output));
+}
+
+export function take_input(args: string) {
+	const args_s = args.split(comma_regex);
+
+	const input_vars: any[] = [];
+
+	args_s.forEach((val) => {
+		val = val.trim();
+		if (identifier_regex.test(val)) {
+			input_vars.push(val);
+		} else {
+		}
+	});
+
+	const input: list_type = {
+		type: "input",
+		values: input_vars,
+	};
+
+	store.dispatch(add_to_list(input));
+	store.dispatch(interrupt_program());
 }

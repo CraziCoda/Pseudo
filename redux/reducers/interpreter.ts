@@ -16,6 +16,7 @@ export interface IInterpreterSlice {
 	executable: CommandI[];
 	variables: VariableI[];
 	current_scope: string;
+	interrupted: boolean;
 }
 
 const iniitialState: IInterpreterSlice = {
@@ -24,6 +25,7 @@ const iniitialState: IInterpreterSlice = {
 	executable: [],
 	variables: [],
 	current_scope: "global",
+	interrupted: false,
 };
 
 const interpreterSlice = createSlice({
@@ -33,6 +35,11 @@ const interpreterSlice = createSlice({
 	reducers: {
 		generate_instructions: (state, { payload }: { payload: string }) => {
 			state.source_code = payload;
+			state.interrupted = false;
+			state.program_counter = 0;
+			state.variables = [];
+			state.executable = [];
+			state.current_scope = "global";
 
 			const lines = payload.split("\n");
 
@@ -47,7 +54,7 @@ const interpreterSlice = createSlice({
 				line = line.replace(/\s+/g, " ");
 
 				// seperate combined characters
-				line = line.replace(/([^\w"]+)|(["][^"]*["])/g, " $1$2 ");
+				line = line.replace(/([^\w"]+|["][^"]*["])/g, " $1 ");
 
 				const command = decode_instructions(index, line);
 
@@ -78,7 +85,15 @@ const interpreterSlice = createSlice({
 				variable.type = payload.type;
 			}
 
-			console.log(variable?.name, variable?.type, variable?.value);
+			// console.log(variable?.name, variable?.type, variable?.value);
+		},
+
+		interrupt_program: (state) => {
+			state.interrupted = true;
+		},
+
+		uninterrupt_program: (state) => {
+			state.interrupted = false;
 		},
 	},
 });
@@ -124,10 +139,7 @@ function decode_instructions(index: number, line: string): CommandI | void {
 				args,
 				line: index + 1,
 			};
-
 			return command;
-
-			// console.log(command);
 		}
 	}
 }
@@ -138,5 +150,7 @@ export const {
 	add_variables,
 	add_variable,
 	assign_variable,
+	interrupt_program,
+	uninterrupt_program,
 } = interpreterSlice.actions;
 export default interpreterSlice.reducer;

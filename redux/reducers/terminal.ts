@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { list } from "postcss";
+import { MutableRefObject } from "react";
 
 export interface ITerminalSlice {
 	list: list_type[];
@@ -24,10 +24,19 @@ const terminalSlice = createSlice({
 
 		clear_terminal: (state) => {
 			state.list = [];
+			console.log("Clear the terminal");
+		},
+		change_current_input_to_output: (
+			state,
+			{ payload }: { payload: string }
+		) => {
+			state.list.pop();
+			state.list.push({ type: "output", values: [payload] });
 		},
 	},
 });
 
-export const { add_to_list, clear_terminal } = terminalSlice.actions;
+export const { add_to_list, clear_terminal, change_current_input_to_output } =
+	terminalSlice.actions;
 
 export default terminalSlice.reducer;

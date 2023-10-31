@@ -2,6 +2,7 @@ import store from "../redux/store/app";
 import {
 	declare_variable,
 	print_to_screen,
+	take_input,
 	variable_assignment,
 } from "./functions";
 import {
@@ -105,7 +106,7 @@ export function execute_instructions() {
 
 	// console.log(command);
 
-	execute_instructions();
+	if (!store.getState().interpreter.interrupted) execute_instructions();
 }
 
 export function idenitfy_token(token: string): token_info | null {
@@ -135,6 +136,7 @@ export function select_function(action: pseudo_actions, args: string) {
 			print_to_screen(args);
 			break;
 		case "input":
+			take_input(args);
 			break;
 		case "variable":
 			declare_variable(args);
