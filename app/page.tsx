@@ -129,7 +129,6 @@ function Footer() {
 			}}
 		>
 			{terminal.list.map((val, i) => {
-				console.log(val);
 				return val.type == "output" ? (
 					<div key={i}>{val.values.join(" ")}</div>
 				) : (

@@ -205,6 +205,20 @@ export function variable_assignment(args: string) {
 						);
 					else assign_to_incoming_data_type(identifier, value);
 				}
+			} else if (identifier_regex.test(value)) {
+				const var_ = current_variables.find((val) => val.name == value);
+
+				if (var_) {
+					// console.log(var_);
+					store.dispatch(
+						assign_variable({
+							name: identifier,
+							type: var_.type,
+							value: var_.value,
+						})
+					);
+				} else {
+				}
 			}
 		} else {
 			// no value error
@@ -248,6 +262,20 @@ export function variable_assignment(args: string) {
 					value: value,
 				};
 				store.dispatch(add_variable(new_var));
+			} else if (identifier_regex.test(value)) {
+				const var_ = current_variables.find((val) => val.name == value);
+
+				if (var_) {
+					console.log(var_, value);
+					const new_var: VariableI = {
+						type: var_.type,
+						name: identifier,
+						scope: current_scope,
+						value: var_.value,
+					};
+					store.dispatch(add_variable(new_var));
+				} else {
+				}
 			}
 		} else {
 			// no value error
