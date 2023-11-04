@@ -54,7 +54,7 @@ const interpreterSlice = createSlice({
 				line = line.replace(/\s+/g, " ");
 
 				// seperate combined characters
-				line = line.replace(/([^\w"]+|["][^"]*["])/g, " $1 ");
+				line = line.replace(/([^\w"']+|["][^"]*["]|['][^']*['])/g, " $1 ");
 
 				const command = decode_instructions(index, line);
 
@@ -100,7 +100,8 @@ const interpreterSlice = createSlice({
 
 function decode_instructions(index: number, line: string): CommandI | void {
 	// const tokens = line.split(" ");
-	const tokens = line.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
+    // split characters by spaces except when space is in quotes
+	const tokens = line.match(/["][^"]*["]|['][^']*[']|[^\s]+/g);
 
 	if (tokens == null) return;
 

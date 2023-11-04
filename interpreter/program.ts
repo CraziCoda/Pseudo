@@ -46,9 +46,11 @@ export const identifier_regex = /^[a-zA-Z_]\w*$/;
 export const number_regex = /[+-]?\d+(\.\d+)?/;
 export const integer_regex = /^-?\d+$/;
 export const float_regex = /-?\d+\.\d+$/;
-export const string_regex = /(['"])(.*?)\1$/;
+// export const string_regex = /(['"])(.*?)\1$/;
+export const string_regex = /^["][^"]*"$|^['][^']*'$/;
 export const comma_regex =
 	/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)(?=(?:(?:[^']*'){2})*[^']*$)/;
+export const fn_identifier_regex = /^[a-zA-Z_][\w ]*[(].*\)$/;
 
 export interface VariableI {
 	readonly name: string;
