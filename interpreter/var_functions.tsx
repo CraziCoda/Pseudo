@@ -197,7 +197,10 @@ function place_in_variables(operation: string) {
 	for (let i = 0; i < op_values.length; i++) {
 		const value = op_values[i];
 
-		if (identifier_regex.test(value) && !pseudo_keywords.includes(value.toLowerCase())) {
+		if (
+			identifier_regex.test(value) &&
+			!pseudo_keywords.includes(value.toLowerCase())
+		) {
 			const variable = current_variables.find((val) => val.name == value);
 			if (variable) {
 				if (variable.type == "string") {
@@ -206,6 +209,13 @@ function place_in_variables(operation: string) {
 				}
 				op_values[i] = variable.value;
 			} else {
+				console.log("Error:", value);
+			}
+		} else if (pseudo_keywords.includes(value.toLowerCase())) {
+			if (value.toLowerCase() == "true" || value.toLowerCase() == "false")
+				op_values[i] = value.toLowerCase();
+			else {
+				// raise an error
 				console.log("Error:", value);
 			}
 		}

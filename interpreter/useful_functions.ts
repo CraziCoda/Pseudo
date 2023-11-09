@@ -73,9 +73,12 @@ function second_precedence(op: string): string {
 	let op_copy = op;
 
 	const second_precedence_regex =
-		/[-]?[\d]+[.]?([\d])*[\/*%][-]?[\d]+[.]?([\d])*/;
+		/([-]?[\d]+[.]?([\d])*|(true|false))[\/*%]([-]?[\d]+[.]?([\d])*|(true|false))/;
 
 	while (second_precedence_regex.test(op_copy)) {
+		op_copy = op_copy.replaceAll("true", "1");
+		op_copy = op_copy.replaceAll("false", "0");
+
 		//@ts-ignore
 		const eq = op_copy.match(second_precedence_regex)[0];
 
@@ -103,7 +106,7 @@ function second_precedence(op: string): string {
 
 				if (operand2 == 0) {
 					// error
-					break;
+					return op;
 				}
 
 				op_copy = op_copy.replace(eq, (operand1 % operand2).toString());
@@ -119,7 +122,7 @@ function second_precedence(op: string): string {
 
 				if (operand2 == 0) {
 					// error
-					break;
+					return op;
 				}
 
 				op_copy = op_copy.replace(eq, (operand1 / operand2).toString());
@@ -136,10 +139,12 @@ function third_precedence(op: string) {
 	let op_copy = op;
 
 	const third_precedence_regex =
-		/[+-]?[\d]+[.]?([\d])*[+-][+-]?[\d]+[.]?([\d])*/;
+		/([+-]?[\d]+[.]?([\d])*|(true|false))[+-]([+-]?[\d]+[.]?([\d])*|(true|false))/;
 
 	while (third_precedence_regex.test(op_copy)) {
-		console.log(op_copy);
+		op_copy = op_copy.replaceAll("true", "1");
+		op_copy = op_copy.replaceAll("false", "0");
+
 		//@ts-ignore
 		const eq = op_copy.match(third_precedence_regex)[0];
 
@@ -176,11 +181,99 @@ function third_precedence(op: string) {
 		// console.log(eq, args, operator, op_copy);
 	}
 
-	op = op_copy;
+	op = fourth_precedence(op_copy);
 
 	return op;
 }
 
 function fourth_precedence(op: string) {
+	let op_copy = op;
+	const fourth_precedence_regex =
+		/[+-]?[\d]+[.]?([\d])*([<>][=]?)[+-]?[\d]+[.]?([\d])*/;
 
+	while (fourth_precedence_regex.test(op_copy)) {
+		//@ts-ignore
+		const eq = op_copy.match(fourth_precedence_regex)[0];
+
+		const args = eq.split(/[<>][=]?/);
+
+		//@ts-ignore
+		const operator = op_copy.match(/[<>][=]?/)[0];
+
+		let operand1: number, operand2: number;
+
+		operand1 = float_regex.test(args[0])
+			? parseFloat(args[0])
+			: parseInt(args[0]);
+		operand2 = float_regex.test(args[1])
+			? parseFloat(args[1])
+			: parseInt(args[1]);
+
+		switch (operator) {
+			case ">":
+				op_copy = op_copy.replace(eq, (operand1 > operand2).toString());
+				break;
+
+			case ">=":
+				op_copy = op_copy.replace(eq, (operand1 >= operand2).toString());
+
+				break;
+			case "<=":
+				op_copy = op_copy.replace(eq, (operand1 <= operand2).toString());
+
+				break;
+			case "<":
+				op_copy = op_copy.replace(eq, (operand1 < operand2).toString());
+
+				break;
+		}
+
+		// console.log(eq, op_copy);
+	}
+
+	op = fifth_precedence(op_copy);
+
+	return op;
+}
+
+function fifth_precedence(op: string) {
+	let op_copy = op;
+	const fifth_precedence_regex =
+		/[+-]?[\d]+[.]?([\d])*([!=][=]?)[+-]?[\d]+[.]?([\d])*/;
+
+	while (fifth_precedence_regex.test(op_copy)) {
+		//@ts-ignore
+		const eq = op_copy.match(fifth_precedence_regex)[0];
+
+		const args = eq.split(/[!=][=]?/);
+
+		//@ts-ignore
+		const operator = op_copy.match(/[!=][=]?/)[0];
+
+		let operand1: number, operand2: number;
+
+		operand1 = float_regex.test(args[0])
+			? parseFloat(args[0])
+			: parseInt(args[0]);
+		operand2 = float_regex.test(args[1])
+			? parseFloat(args[1])
+			: parseInt(args[1]);
+
+		switch (operator) {
+			case "==":
+				op_copy = op_copy.replace(eq, ((operand1 == operand2)).toString());
+				break;
+
+			case "!=":
+				op_copy = op_copy.replace(eq, (operand1 != operand2).toString());
+
+				break;
+		}
+
+		console.log(eq, op_copy, operand1 == operand2);
+	}
+
+	op = op_copy;
+
+	return op;
 }
