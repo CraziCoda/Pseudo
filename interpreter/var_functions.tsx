@@ -7,6 +7,7 @@ import {
 	fn_identifier_regex,
 	identifier_regex,
 	integer_regex,
+	pseudo_keywords,
 	string_regex,
 } from "./program";
 import { work_on_operations } from "./useful_functions";
@@ -196,7 +197,7 @@ function place_in_variables(operation: string) {
 	for (let i = 0; i < op_values.length; i++) {
 		const value = op_values[i];
 
-		if (identifier_regex.test(value)) {
+		if (identifier_regex.test(value) && !pseudo_keywords.includes(value.toLowerCase())) {
 			const variable = current_variables.find((val) => val.name == value);
 			if (variable) {
 				if (variable.type == "string") {
