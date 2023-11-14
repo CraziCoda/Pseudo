@@ -192,17 +192,13 @@ function third_precedence(op: string) {
 
 	while (third_precedence_regex.test(op_copy)) {
 		//@ts-ignore
-		let eq = op_copy.match(third_precedence_regex)[0];
+		const eq = op_copy.match(third_precedence_regex)[0];
 
-		eq = eq.replace(/(\d+\.?\d*[-])(\d+\.?\d*)/, "$1+$2");
+		const eq_copy = eq.replace(/(\d+\.?\d*[-])(\d+\.?\d*)/, "$1+$2");
 
-		console.log("Equation: ", eq);
-
-		const args = eq.match(
+		const args = eq_copy.match(
 			/(["][^"]*"|['][^']*'|[-+]?\d+[.]?\d*|true|false)/g
 		) || [""];
-
-		console.log(args);
 
 		const operator = op_copy.match(/(?<=.)[-+]/)?.[0];
 
@@ -216,7 +212,7 @@ function third_precedence(op: string) {
 						/(["][^"]*"|['][^']*'|[-]?\d+[.]?\d*|true|false)/g
 					);
 
-					console.log(op1, op2, operator);
+					// console.log(op1, op2, operator);
 
 					op1 = op1.replaceAll(/^['"]|['"]$/g, "");
 					op2 = op2.replaceAll(/^['"]|['"]$/g, "");
@@ -246,14 +242,13 @@ function third_precedence(op: string) {
 					? parseFloat(args[1])
 					: parseInt(args[1]);
 
-				console.log(operand1, operand2, operator);
+				// console.log(operand1, operand2, operator);
 
 				op_copy = op_copy.replace(eq, (operand1 - operand2).toString());
 				break;
 			default:
 				break;
 		}
-		break;
 	}
 
 	op_copy = op_copy.replaceAll(/^['"]|['"]$/g, "");
@@ -332,7 +327,7 @@ function fifth_precedence(op: string) {
 		//@ts-ignore
 		const operator = op_copy.match(/[!=][=]/)[0];
 
-		console.log(args, operator);
+		// console.log(args, operator);
 
 		let operand1: number | boolean | string,
 			operand2: number | boolean | string;
@@ -343,7 +338,6 @@ function fifth_precedence(op: string) {
 			operand1 = args[0] == "true" ? true : false;
 		} else {
 			operand1 = args[0].substring(1, args[0].length - 1);
-			console.log(operand1.length);
 		}
 
 		if (number_regex.test(args[1])) {
@@ -352,10 +346,9 @@ function fifth_precedence(op: string) {
 			operand2 = args[1] == "true" ? true : false;
 		} else {
 			operand2 = args[1].substring(1, args[1].length - 1);
-			console.log(operand2.length);
 		}
 
-		console.log(operand1, operand2);
+		// console.log(operand1, operand2);
 
 		switch (operator) {
 			case "==":
@@ -426,7 +419,7 @@ function or_precedence(op: string) {
 		operand1 = args[0] == "true" ? true : false;
 		operand2 = args[1] == "true" ? true : false;
 
-		console.log(operand1, operand2);
+		// console.log(operand1, operand2);
 
 		switch (operator) {
 			case "|":
