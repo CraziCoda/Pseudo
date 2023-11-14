@@ -175,6 +175,7 @@ export function assign_var(identifier: string, value: any) {
 		} else {
 			// no value error
 			generic_error("Expected a value after '='");
+			return;
 		}
 	}
 }

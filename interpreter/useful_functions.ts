@@ -41,7 +41,6 @@ export function work_on_operations(operation: string) {
 
 		// Add a did you mean section to this
 		generic_error(`Unexpected operation: ${err_op}`);
-
 		return "";
 	}
 
@@ -62,13 +61,12 @@ function get_brackets_values(op: string) {
 	);
 
 	// Check if string operation is invalid
-	if (/(["][^"]*"|['][^']*')[^+]/.test(op)) {
+	if (/(["][^"]*"|['][^']*')[^+=!\s]$/.test(op + " ")) {
 		//@ts-expect-error
-		const err_op = op.match(/(["][^"]*"|['][^']*')[^+].*/)[0];
+		const err_op = op.match(/(["][^"]*"|['][^']*')[^+=!]?.*/)[0];
 
 		// Add a did you mean section to this
 		generic_error(`Unexpected operation: ${err_op}`);
-
 		return "";
 	}
 
@@ -102,7 +100,6 @@ function first_precendence(op: string) {
 		}
 	}
 	op = second_precedence(op);
-
 	return op;
 }
 
@@ -113,8 +110,8 @@ function second_precedence(op: string): string {
 		/([-]?[\d]+[.]?([\d])*|(true|false))[\/*%]([-]?[\d]+[.]?([\d])*|(true|false))/;
 
 	while (second_precedence_regex.test(op_copy)) {
-		op_copy = op_copy.replaceAll("true", "1");
-		op_copy = op_copy.replaceAll("false", "0");
+		// op_copy = op_copy.replaceAll("true", "1");
+		// op_copy = op_copy.replaceAll("false", "0");
 
 		//@ts-ignore
 		const eq = op_copy.match(second_precedence_regex)[0];
@@ -124,6 +121,16 @@ function second_precedence(op: string): string {
 		//@ts-ignore
 		const operator = op_copy.match(/[/*%]/)[0];
 		let operand1: number, operand2: number;
+
+		console.log(args);
+
+		args[0] = args[0].replaceAll(/true/g, "1");
+		args[0] = args[0].replaceAll(/false/g, "0");
+
+		args[1] = args[1].replaceAll(/true/g, "1");
+		args[1] = args[1].replaceAll(/false/g, "0");
+
+		console.log(args);
 
 		switch (operator) {
 			case "*":
@@ -188,14 +195,11 @@ function third_precedence(op: string) {
 		/(["][^"]*"|['][^']*'|[+-]?\d+[.]?\d*|true|false)[+-](["][^"]*"|['][^']*'|[+-]?\d+[.]?\d*|true|false)/;
 
 	while (third_precedence_regex.test(op_copy)) {
-		op_copy = op_copy.replaceAll("true", "1");
-		op_copy = op_copy.replaceAll("false", "0");
-
 		//@ts-ignore
 		const eq = op_copy.match(third_precedence_regex)[0];
 
 		const args = eq.match(
-			/(["][^"]*"|^['][^']*'|[-+]?\d+[.]?\d*|true|false|.*)/g
+			/(["][^"]*"|['][^']*'|[-+]?\d+[.]?\d*|true|false|.*)/g
 		) || [""];
 
 		const operator = op_copy.match(/[-+]/)?.[0];
@@ -207,13 +211,15 @@ function third_precedence(op: string) {
 				if (string_regex.test(args[0]) || string_regex.test(args[1])) {
 					//@ts-expect-error
 					let [op1, op2] = op_copy.match(
-						/(["][^"]*"|^['][^']*'|[-]?\d+[.]?\d*|true|false)/g
+						/(["][^"]*"|['][^']*'|[-]?\d+[.]?\d*|true|false)/g
 					);
+
+					console.log(op1, op2);
 
 					op1 = op1.replaceAll(/^['"]|['"]$/g, "");
 					op2 = op2.replaceAll(/^['"]|['"]$/g, "");
 
-					op_copy = op_copy.replace(eq, `${op1 + op2}`);
+					op_copy = op_copy.replace(eq, `"${op1 + op2}"`);
 					break;
 				}
 
@@ -229,6 +235,7 @@ function third_precedence(op: string) {
 			case "-":
 				if (string_regex.test(args[0]) || string_regex.test(args[1])) {
 					generic_error(`Invalid operation: ${op}`);
+					return "";
 				}
 				operand1 = float_regex.test(args[0])
 					? parseFloat(args[0])
@@ -246,7 +253,7 @@ function third_precedence(op: string) {
 		}
 	}
 
-	op_copy = op_copy.replaceAll(/^['"]|['"]$/g, "");
+	// op_copy = op_copy.replaceAll(/^['"]|['"]$/g, "");
 
 	op = fourth_precedence(op_copy);
 
@@ -300,6 +307,7 @@ function fourth_precedence(op: string) {
 
 	if (/[<>][=]?/.test(op_copy)) {
 		generic_error(`Invalid operation: ${op}`);
+		return "";
 	}
 
 	op = fifth_precedence(op_copy);
@@ -323,33 +331,39 @@ function fifth_precedence(op: string) {
 
 		console.log(args, operator);
 
-		// let operand1: number | boolean, operand2: number | boolean;
-		// operand1 = float_regex.test(args[0])
-		// 	? parseFloat(args[0])
-		// 	: parseInt(args[0]);
-		// operand2 = float_regex.test(args[1])
-		// 	? parseFloat(args[1])
-		// 	: parseInt(args[1]);
+		let operand1: number | boolean | string,
+			operand2: number | boolean | string;
 
-		// if (float_regex.test(args[0])) operand1 = parseFloat(args[0]);
-		// if (float_regex.test(args[1])) operand2 = parseFloat(args[1]);
+		if (number_regex.test(args[0])) {
+			operand1 = parseFloat(args[0]);
+		} else if (args[0] == "true" || args[0] == "false") {
+			operand1 = args[0] == "true" ? true : false;
+		} else {
+			operand1 = args[0].substring(1, args[0].length - 1);
+			console.log(operand1.length);
+		}
 
-		// if (integer_regex.test(args[0])) operand1 = parseInt(args[0]);
-		// else operand1 = args[0] == "true" ? true : false;
-		// if (integer_regex.test(args[1])) operand2 = parseInt(args[1]);
-		// else operand2 = args[1] == "true" ? true : false;
+		if (number_regex.test(args[1])) {
+			operand2 = parseFloat(args[1]);
+		} else if (args[1] == "true" || args[1] == "false") {
+			operand2 = args[1] == "true" ? true : false;
+		} else {
+			operand2 = args[1].substring(1, args[1].length - 1);
+			console.log(operand2.length);
+		}
 
-		// switch (operator) {
-		// 	case "==":
-		// 		op_copy = op_copy.replace(eq, (operand1 == operand2).toString());
-		// 		break;
+		console.log(operand1, operand2);
 
-		// 	case "!=":
-		// 		op_copy = op_copy.replace(eq, (operand1 != operand2).toString());
-		// 		break;
-		// }
+		switch (operator) {
+			case "==":
+				op_copy = op_copy.replace(eq, (operand1 == operand2).toString());
+				break;
+
+			case "!=":
+				op_copy = op_copy.replace(eq, (operand1 != operand2).toString());
+				break;
+		}
 	}
-
 	op = and_precedence(op_copy);
 
 	return op;
@@ -430,7 +444,7 @@ function or_precedence(op: string) {
 
 function get_all_special_characters(op: string) {
 	const characters = op.replaceAll(
-		/(["][^"]*"|^['][^']*')|([+-]?\d+[.]?(\d)*)|(true|false)/g,
+		/(["][^"]*"|['][^']*')|([+-]?\d+[.]?(\d)*)|(true|false)/g,
 		""
 	);
 
