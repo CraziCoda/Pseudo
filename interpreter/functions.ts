@@ -3,6 +3,7 @@ import {
 	comma_regex,
 	data_type_t,
 	float_regex,
+	fn_identifier_regex,
 	identifier_regex,
 	integer_regex,
 	pseudo_data_type,
@@ -16,8 +17,9 @@ import {
 	interrupt_program,
 } from "@/redux/reducers/interpreter";
 import { add_to_list, list_type } from "@/redux/reducers/terminal";
-import { assign_var } from "./var_functions";
+import { assign_var, place_in_variables } from "./var_functions";
 import generic_error from "./error_functions";
+import { work_on_operations } from "./useful_functions";
 
 export function declare_variable(args: string) {
 	const args_s = args.split(" ");
@@ -151,6 +153,11 @@ export function print_to_screen(args: string) {
 					generic_error(`Unknown (Undefined) variable is being used: ${value}`);
 					return;
 				}
+			} else if (fn_identifier_regex.test(value)) {
+				//function call
+			} else {
+				const operation = place_in_variables(value);
+				print_values.push(operation);
 			}
 		} else {
 			generic_error(`Excepted a value between the two commas`);

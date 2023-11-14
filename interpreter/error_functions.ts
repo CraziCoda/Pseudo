@@ -1,4 +1,4 @@
-import { add_to_list } from "@/redux/reducers/terminal";
+import { add_to_list, pause_terminal } from "@/redux/reducers/terminal";
 import store from "../redux/store/app";
 import { print_to_screen } from "./functions";
 import {
@@ -11,7 +11,7 @@ export default function generic_error(msg: string) {
 
 	const program_counter = interpreter.program_counter;
 
-    // console.log(interpreter.executable, program_counter)
+	// console.log(interpreter.executable, program_counter)
 
 	const current_line = interpreter.executable[program_counter - 1].line;
 
@@ -27,4 +27,5 @@ export default function generic_error(msg: string) {
 
 	store.dispatch(interrupt_program());
 	store.dispatch(move_program_counter(0));
+	store.dispatch(pause_terminal());
 }

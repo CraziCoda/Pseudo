@@ -207,7 +207,7 @@ function detect_data_type(data: string): data_type_t | null {
 	return null;
 }
 
-function place_in_variables(operation: string): string {
+export function place_in_variables(operation: string): string {
 	const op_spaced = operation.replace(
 		/([^\w"']+|["][^"]*["]|['][^']*['])/g,
 		" $1 "

@@ -122,15 +122,11 @@ function second_precedence(op: string): string {
 		const operator = op_copy.match(/[/*%]/)[0];
 		let operand1: number, operand2: number;
 
-		console.log(args);
-
 		args[0] = args[0].replaceAll(/true/g, "1");
 		args[0] = args[0].replaceAll(/false/g, "0");
 
 		args[1] = args[1].replaceAll(/true/g, "1");
 		args[1] = args[1].replaceAll(/false/g, "0");
-
-		console.log(args);
 
 		switch (operator) {
 			case "*":
@@ -196,13 +192,19 @@ function third_precedence(op: string) {
 
 	while (third_precedence_regex.test(op_copy)) {
 		//@ts-ignore
-		const eq = op_copy.match(third_precedence_regex)[0];
+		let eq = op_copy.match(third_precedence_regex)[0];
+
+		eq = eq.replace(/(\d+\.?\d*[-])(\d+\.?\d*)/, "$1+$2");
+
+		console.log("Equation: ", eq);
 
 		const args = eq.match(
-			/(["][^"]*"|['][^']*'|[-+]?\d+[.]?\d*|true|false|.*)/g
+			/(["][^"]*"|['][^']*'|[-+]?\d+[.]?\d*|true|false)/g
 		) || [""];
 
-		const operator = op_copy.match(/[-+]/)?.[0];
+		console.log(args);
+
+		const operator = op_copy.match(/(?<=.)[-+]/)?.[0];
 
 		let operand1: number, operand2: number;
 
@@ -214,7 +216,7 @@ function third_precedence(op: string) {
 						/(["][^"]*"|['][^']*'|[-]?\d+[.]?\d*|true|false)/g
 					);
 
-					console.log(op1, op2);
+					console.log(op1, op2, operator);
 
 					op1 = op1.replaceAll(/^['"]|['"]$/g, "");
 					op2 = op2.replaceAll(/^['"]|['"]$/g, "");
@@ -244,16 +246,17 @@ function third_precedence(op: string) {
 					? parseFloat(args[1])
 					: parseInt(args[1]);
 
-				// console.log(operand1, operand2);
+				console.log(operand1, operand2, operator);
 
 				op_copy = op_copy.replace(eq, (operand1 - operand2).toString());
 				break;
 			default:
 				break;
 		}
+		break;
 	}
 
-	// op_copy = op_copy.replaceAll(/^['"]|['"]$/g, "");
+	op_copy = op_copy.replaceAll(/^['"]|['"]$/g, "");
 
 	op = fourth_precedence(op_copy);
 
