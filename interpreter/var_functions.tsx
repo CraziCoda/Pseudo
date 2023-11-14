@@ -11,6 +11,7 @@ import {
 	string_regex,
 } from "./program";
 import { work_on_operations } from "./useful_functions";
+import generic_error from "./error_functions";
 
 export function assign_var(identifier: string, value: any) {
 	const current_variables = store.getState().interpreter.variables;
@@ -90,8 +91,20 @@ export function assign_var(identifier: string, value: any) {
 			} else if (fn_identifier_regex.test(value)) {
 			} else {
 				// console.log(value);
-				place_in_variables(value);
+				const op_value = place_in_variables(value);
+				const op_value_type = detect_data_type(op_value);
+
+				store.dispatch(
+					assign_variable({
+						name: identifier,
+						type: op_value_type || "string",
+						value: op_value,
+					})
+				);
 			}
+		} else {
+			// no value error
+			generic_error("Expected a value after '='");
 		}
 	} else {
 		if (value != "") {
@@ -148,10 +161,20 @@ export function assign_var(identifier: string, value: any) {
 				// console.log(value);
 			} else {
 				// console.log(value);
-				place_in_variables(value);
+				const op_value = place_in_variables(value);
+				const op_value_type = detect_data_type(op_value);
+
+				const new_var: VariableI = {
+					type: op_value_type || "string",
+					name: identifier,
+					scope: current_scope,
+					value: op_value,
+				};
+				store.dispatch(add_variable(new_var));
 			}
 		} else {
 			// no value error
+			generic_error("Expected a value after '='");
 		}
 	}
 }
@@ -183,14 +206,14 @@ function detect_data_type(data: string): data_type_t | null {
 	return null;
 }
 
-function place_in_variables(operation: string) {
+function place_in_variables(operation: string): string {
 	const op_spaced = operation.replace(
 		/([^\w"']+|["][^"]*["]|['][^']*['])/g,
 		" $1 "
 	);
 	const op_values = op_spaced.match(/["][^"]*["]|['][^']*[']|[^\s]+/g);
 
-	if (op_values == null) return;
+	if (op_values == null) return "";
 
 	const current_variables = store.getState().interpreter.variables;
 
@@ -209,19 +232,21 @@ function place_in_variables(operation: string) {
 				}
 				op_values[i] = variable.value;
 			} else {
-				console.log("Error:", value);
+				generic_error(`Unknown (Undefined) variable is being used: ${value}`);
+				return "";
 			}
 		} else if (pseudo_keywords.includes(value.toLowerCase())) {
 			if (value.toLowerCase() == "true" || value.toLowerCase() == "false")
 				op_values[i] = value.toLowerCase();
 			else {
 				// raise an error
-				console.log("Error:", value);
+				generic_error(`Unexpected use of a keyword: ${value}`);
+				return "";
 			}
 		}
 	}
 
 	const op = op_values.join("");
 
-	work_on_operations(op);
+	return work_on_operations(op);
 }

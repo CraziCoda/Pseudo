@@ -100,7 +100,7 @@ const interpreterSlice = createSlice({
 
 function decode_instructions(index: number, line: string): CommandI | void {
 	// const tokens = line.split(" ");
-    // split characters by spaces except when space is in quotes
+	// split characters by spaces except when space is in quotes
 	const tokens = line.match(/["][^"]*["]|['][^']*[']|[^\s]+/g);
 
 	if (tokens == null) return;
@@ -124,7 +124,7 @@ function decode_instructions(index: number, line: string): CommandI | void {
 		return command;
 
 		// console.log(command);
-	} else if (token_1?.type == "identifier" && tokens.length > 2) {
+	} else if (token_1?.type == "identifier" && tokens.length >= 2) {
 		const token_2 = tokens[1];
 
 		// remove identifier

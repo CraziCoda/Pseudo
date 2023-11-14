@@ -1,12 +1,17 @@
-import { L } from "@tauri-apps/api/event-41a9edf5";
-import { float_regex, number_regex } from "./program";
+import {
+	float_regex,
+	integer_regex,
+	number_regex,
+	string_regex,
+} from "./program";
+import generic_error from "./error_functions";
 
 export function match_string_between_two_characters(
 	text: string,
 	start: string,
 	end: string,
 	level: number
-): string[] {
+): string[] | null {
 	let current_level = 0;
 	let matched_string = "";
 	let matches: string[] = [];
@@ -25,11 +30,27 @@ export function match_string_between_two_characters(
 			}
 		}
 	}
+
+	if (current_level != 0) return null;
 	return matches;
 }
 export function work_on_operations(operation: string) {
+	if (/([\d]+[.]?[\d]*|true|false)[(]/.test(operation)) {
+		//@ts-expect-error
+		const err_op = operation.match(/([\d]+[.]?[\d]*|true|false)[(].*/)[0];
+
+		// Add a did you mean section to this
+		generic_error(`Unexpected operation: ${err_op}`);
+
+		return "";
+	}
+
+	if (get_all_special_characters(operation)) return "";
+
 	const final_op = get_brackets_values(operation);
 	console.log("Final:", final_op);
+
+	return final_op;
 }
 
 function get_brackets_values(op: string) {
@@ -40,6 +61,22 @@ function get_brackets_values(op: string) {
 		1
 	);
 
+	// Check if string operation is invalid
+	if (/(["][^"]*"|['][^']*')[^+]/.test(op)) {
+		//@ts-expect-error
+		const err_op = op.match(/(["][^"]*"|['][^']*')[^+].*/)[0];
+
+		// Add a did you mean section to this
+		generic_error(`Unexpected operation: ${err_op}`);
+
+		return "";
+	}
+
+	if (bracket_operations == null) {
+		generic_error(`Unmatched brackets in '${op}'`);
+		return op;
+	}
+
 	for (let i = 0; i < bracket_operations.length; i++) {
 		const _op = bracket_operations[i];
 		let op_ans = get_brackets_values(_op.substring(1, _op.length - 1));
@@ -47,23 +84,23 @@ function get_brackets_values(op: string) {
 		op_ans = first_precendence(op_ans);
 
 		op = op.replace(_op, op_ans);
-
-		// console.log(op_ans, op, _op);
 	}
+
+	op = first_precendence(op);
 
 	return op;
 }
 
 function first_precendence(op: string) {
 	if (/!/.test(op)) {
-		if (/!true|!false/) {
+		if (/!true|!false/.test(op)) {
 			op = op.replace(/!true/i, "false");
 			op = op.replace(/!false/i, "true");
 		} else {
 			// raise error
+			generic_error(`Expected a true or false after !: ${op}`);
 		}
 	}
-
 	op = second_precedence(op);
 
 	return op;
@@ -131,6 +168,12 @@ function second_precedence(op: string): string {
 				break;
 		}
 	}
+
+	if (/[\/*%]/.test(op_copy)) {
+		generic_error(`Invalid operation: ${op}`);
+		return "";
+	}
+
 	op = third_precedence(op_copy);
 	return op;
 }
@@ -138,8 +181,11 @@ function second_precedence(op: string): string {
 function third_precedence(op: string) {
 	let op_copy = op;
 
+	// const third_precedence_regex =
+	// 	/([+-]?[\d]+[.]?([\d])*|(true|false))[+-]([+-]?[\d]+[.]?([\d])*|(true|false))/;
+
 	const third_precedence_regex =
-		/([+-]?[\d]+[.]?([\d])*|(true|false))[+-]([+-]?[\d]+[.]?([\d])*|(true|false))/;
+		/(["][^"]*"|['][^']*'|[+-]?\d+[.]?\d*|true|false)[+-](["][^"]*"|['][^']*'|[+-]?\d+[.]?\d*|true|false)/;
 
 	while (third_precedence_regex.test(op_copy)) {
 		op_copy = op_copy.replaceAll("true", "1");
@@ -148,13 +194,29 @@ function third_precedence(op: string) {
 		//@ts-ignore
 		const eq = op_copy.match(third_precedence_regex)[0];
 
-		const args = eq.split(/(?<=[\d.])[-+]/);
-		//@ts-ignore
-		const operator = op_copy.match(/(?<=[\d.])[-+]/)[0];
+		const args = eq.match(
+			/(["][^"]*"|^['][^']*'|[-+]?\d+[.]?\d*|true|false|.*)/g
+		) || [""];
+
+		const operator = op_copy.match(/[-+]/)?.[0];
+
 		let operand1: number, operand2: number;
 
 		switch (operator) {
 			case "+":
+				if (string_regex.test(args[0]) || string_regex.test(args[1])) {
+					//@ts-expect-error
+					let [op1, op2] = op_copy.match(
+						/(["][^"]*"|^['][^']*'|[-]?\d+[.]?\d*|true|false)/g
+					);
+
+					op1 = op1.replaceAll(/^['"]|['"]$/g, "");
+					op2 = op2.replaceAll(/^['"]|['"]$/g, "");
+
+					op_copy = op_copy.replace(eq, `${op1 + op2}`);
+					break;
+				}
+
 				operand1 = float_regex.test(args[0])
 					? parseFloat(args[0])
 					: parseInt(args[0]);
@@ -165,6 +227,9 @@ function third_precedence(op: string) {
 				op_copy = op_copy.replace(eq, (operand1 + operand2).toString());
 				break;
 			case "-":
+				if (string_regex.test(args[0]) || string_regex.test(args[1])) {
+					generic_error(`Invalid operation: ${op}`);
+				}
 				operand1 = float_regex.test(args[0])
 					? parseFloat(args[0])
 					: parseInt(args[0]);
@@ -176,10 +241,12 @@ function third_precedence(op: string) {
 
 				op_copy = op_copy.replace(eq, (operand1 - operand2).toString());
 				break;
+			default:
+				break;
 		}
-
-		// console.log(eq, args, operator, op_copy);
 	}
+
+	op_copy = op_copy.replaceAll(/^['"]|['"]$/g, "");
 
 	op = fourth_precedence(op_copy);
 
@@ -231,6 +298,10 @@ function fourth_precedence(op: string) {
 		// console.log(eq, op_copy);
 	}
 
+	if (/[<>][=]?/.test(op_copy)) {
+		generic_error(`Invalid operation: ${op}`);
+	}
+
 	op = fifth_precedence(op_copy);
 
 	return op;
@@ -239,41 +310,134 @@ function fourth_precedence(op: string) {
 function fifth_precedence(op: string) {
 	let op_copy = op;
 	const fifth_precedence_regex =
-		/[+-]?[\d]+[.]?([\d])*([!=][=]?)[+-]?[\d]+[.]?([\d])*/;
+		/(["][^"]*"|['][^']*'|[+-]?[\d]+[.]?[\d]*|true|false)[!=][=](["][^"]*"|['][^']*'|[+-]?[\d]+[.]?[\d]*|true|false)/;
 
 	while (fifth_precedence_regex.test(op_copy)) {
 		//@ts-ignore
 		const eq = op_copy.match(fifth_precedence_regex)[0];
 
-		const args = eq.split(/[!=][=]?/);
+		const args = eq.split(/[!=][=]/);
 
 		//@ts-ignore
-		const operator = op_copy.match(/[!=][=]?/)[0];
+		const operator = op_copy.match(/[!=][=]/)[0];
 
-		let operand1: number, operand2: number;
+		console.log(args, operator);
 
-		operand1 = float_regex.test(args[0])
-			? parseFloat(args[0])
-			: parseInt(args[0]);
-		operand2 = float_regex.test(args[1])
-			? parseFloat(args[1])
-			: parseInt(args[1]);
+		// let operand1: number | boolean, operand2: number | boolean;
+		// operand1 = float_regex.test(args[0])
+		// 	? parseFloat(args[0])
+		// 	: parseInt(args[0]);
+		// operand2 = float_regex.test(args[1])
+		// 	? parseFloat(args[1])
+		// 	: parseInt(args[1]);
+
+		// if (float_regex.test(args[0])) operand1 = parseFloat(args[0]);
+		// if (float_regex.test(args[1])) operand2 = parseFloat(args[1]);
+
+		// if (integer_regex.test(args[0])) operand1 = parseInt(args[0]);
+		// else operand1 = args[0] == "true" ? true : false;
+		// if (integer_regex.test(args[1])) operand2 = parseInt(args[1]);
+		// else operand2 = args[1] == "true" ? true : false;
+
+		// switch (operator) {
+		// 	case "==":
+		// 		op_copy = op_copy.replace(eq, (operand1 == operand2).toString());
+		// 		break;
+
+		// 	case "!=":
+		// 		op_copy = op_copy.replace(eq, (operand1 != operand2).toString());
+		// 		break;
+		// }
+	}
+
+	op = and_precedence(op_copy);
+
+	return op;
+}
+
+function and_precedence(op: string) {
+	let op_copy = op;
+	const and_precedence_regex = /(true|false)&(true|false)/;
+
+	while (and_precedence_regex.test(op_copy)) {
+		//@ts-ignore
+		const eq = op_copy.match(and_precedence_regex)[0];
+
+		const args = eq.split(/&/);
+
+		//@ts-ignore
+		const operator = op_copy.match(/&/)[0];
+
+		let operand1: number | boolean, operand2: number | boolean;
+
+		operand1 = args[0] == "true" ? true : false;
+		operand2 = args[1] == "true" ? true : false;
 
 		switch (operator) {
-			case "==":
-				op_copy = op_copy.replace(eq, ((operand1 == operand2)).toString());
-				break;
-
-			case "!=":
-				op_copy = op_copy.replace(eq, (operand1 != operand2).toString());
-
+			case "&":
+				op_copy = op_copy.replace(eq, (operand1 && operand2).toString());
 				break;
 		}
+	}
 
-		console.log(eq, op_copy, operand1 == operand2);
+	if (/&/.test(op_copy)) {
+		generic_error(`Invalid operation: ${op}`);
+		return "";
+	}
+
+	op = or_precedence(op_copy);
+	// op = op_copy;
+
+	return op;
+}
+
+function or_precedence(op: string) {
+	let op_copy = op;
+	const or_precedence_regex = /(true|false)\|(true|false)/;
+
+	while (or_precedence_regex.test(op_copy)) {
+		//@ts-ignore
+		const eq = op_copy.match(or_precedence_regex)[0];
+
+		const args = eq.split(/\|/);
+
+		//@ts-ignore
+		const operator = op_copy.match(/\|/)[0];
+
+		let operand1: number | boolean, operand2: number | boolean;
+
+		operand1 = args[0] == "true" ? true : false;
+		operand2 = args[1] == "true" ? true : false;
+
+		console.log(operand1, operand2);
+
+		switch (operator) {
+			case "|":
+				op_copy = op_copy.replace(eq, (operand1 || operand2).toString());
+				break;
+		}
+	}
+
+	if (/\|/.test(op_copy)) {
+		generic_error(`Invalid operation: ${op}`);
+		return "";
 	}
 
 	op = op_copy;
 
 	return op;
+}
+
+function get_all_special_characters(op: string) {
+	const characters = op.replaceAll(
+		/(["][^"]*"|^['][^']*')|([+-]?\d+[.]?(\d)*)|(true|false)/g,
+		""
+	);
+
+	if (/[^!()*/%-+><=|&\s]/.test(characters)) {
+		const char = characters.match(/[^!()*/%-+><=|&\s]/)?.[0];
+		generic_error(`Unknown character found in opertaion: ${char}`);
+		return true;
+	}
+	return false;
 }

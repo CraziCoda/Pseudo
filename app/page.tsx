@@ -130,7 +130,14 @@ function Footer() {
 		>
 			{terminal.list.map((val, i) => {
 				return val.type == "output" ? (
-					<div key={i}>{val.values.join(" ")}</div>
+					<div
+						key={i}
+						style={{
+							color: val.isError ? "red" : "inherit",
+						}}
+					>
+						{val.values.join(" ")}
+					</div>
 				) : (
 					<div key={i}>
 						<input

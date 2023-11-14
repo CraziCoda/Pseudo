@@ -43,7 +43,7 @@ export const pseudo_data_type: data_type_t[] = [
 ];
 
 export const identifier_regex = /^[a-zA-Z_]\w*$/;
-export const number_regex = /[+-]?\d+[.]?(\d+)?/;
+export const number_regex = /^[+-]?\d+[.]?(\d)*$/;
 export const integer_regex = /^-?\d+$/;
 export const float_regex = /-?\d+\.\d+$/;
 // export const string_regex = /(['"])(.*?)\1$/;

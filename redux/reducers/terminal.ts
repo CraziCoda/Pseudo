@@ -8,6 +8,7 @@ export interface ITerminalSlice {
 export type list_type = {
 	type: "output" | "input";
 	values: any[];
+    isError?: boolean
 };
 
 const iniitialState: ITerminalSlice = {

@@ -17,6 +17,7 @@ import {
 } from "@/redux/reducers/interpreter";
 import { add_to_list, list_type } from "@/redux/reducers/terminal";
 import { assign_var } from "./var_functions";
+import generic_error from "./error_functions";
 
 export function declare_variable(args: string) {
 	const args_s = args.split(" ");
@@ -103,7 +104,7 @@ export function input_assignment(args: string) {
 }
 
 export function variable_assignment(args: string) {
-    // split characters by spaces except when space is in quotes
+	// split characters by spaces except when space is in quotes
 	const args_s = args.match(/["][^"]*["]|['][^']*[']|[^\s]+/g);
 
 	if (args_s == null) return;
@@ -122,7 +123,8 @@ export function print_to_screen(args: string) {
 
 	const print_values: any[] = [];
 
-	args_s.forEach((val) => {
+	for (let i = 0; i < args_s.length; i++) {
+		const val = args_s[i];
 		let value = val.trim();
 
 		if (value != "") {
@@ -130,24 +132,31 @@ export function print_to_screen(args: string) {
 				integer_regex.test(value) ||
 				float_regex.test(value) ||
 				string_regex.test(value)
-			)
+			) {
 				print_values.push(
 					(integer_regex.test(value) && parseInt(value)) ||
 						(float_regex.test(value) && parseFloat(value)) ||
 						value.substring(1, value.length - 1)
 				);
-			else if (value.toLowerCase() == "true" || value.toLowerCase() == "false")
+			} else if (
+				value.toLowerCase() == "true" ||
+				value.toLowerCase() == "false"
+			) {
 				print_values.push(value.toLowerCase() == "true");
-			else if (identifier_regex.test(value)) {
+			} else if (identifier_regex.test(value)) {
 				const pseudo_var = current_variables.find((val) => val.name == value);
 				if (pseudo_var) print_values.push(pseudo_var.value);
 				else {
 					// varaible doesn't exist error
+					generic_error(`Unknown (Undefined) variable is being used: ${value}`);
+					return;
 				}
 			}
 		} else {
+			generic_error(`Excepted a value between the two commas`);
+			return;
 		}
-	});
+	}
 
 	const output: list_type = {
 		type: "output",
