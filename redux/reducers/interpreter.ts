@@ -1,3 +1,8 @@
+// import {
+// 	get_if_blocks,
+// 	get_inner_most_if,
+// 	preprocess_if,
+// } from "@/interpreter/control_struct_functions";
 import {
 	CommandI,
 	VariableI,
@@ -17,6 +22,7 @@ export interface IInterpreterSlice {
 	variables: VariableI[];
 	current_scope: string;
 	interrupted: boolean;
+	scope_path: string[];
 }
 
 const iniitialState: IInterpreterSlice = {
@@ -26,6 +32,7 @@ const iniitialState: IInterpreterSlice = {
 	variables: [],
 	current_scope: "global",
 	interrupted: false,
+	scope_path: ["global"],
 };
 
 const interpreterSlice = createSlice({
@@ -43,7 +50,10 @@ const interpreterSlice = createSlice({
 
 			const lines = payload.split("\n");
 
-			lines.forEach((line, index) => {
+			payload = payload.replace(/\/\/.*/g, "");
+
+			for (let i = 0; i < lines.length; i++) {
+				let line = lines[i];
 				// this will clear source code given
 				if (line.startsWith("//") || line == "") return;
 
@@ -51,15 +61,26 @@ const interpreterSlice = createSlice({
 				line = line.trim().replace(/\/\/.*/g, "");
 
 				// excess spaces
-				line = line.replace(/\s+/g, " ");
+				// line = line.replace(/\s+/g, " ");
+				line = line.match(/["][^"]*"|['][^']*'|\S+/g)?.join(" ") as string;
 
 				// seperate combined characters
 				line = line.replace(/([^\w"']+|["][^"]*["]|['][^']*['])/g, " $1 ");
 
-				const command = decode_instructions(index, line);
+				const command = decode_instructions(i, line);
 
 				if (command) state.executable.push(command);
-			});
+			}
+		},
+
+		setup: (state, { payload }: { payload: string }) => {
+			state.source_code = payload;
+			state.interrupted = false;
+			state.program_counter = 0;
+			state.variables = [];
+			state.executable = [];
+			state.current_scope = "global";
+			state.scope_path = ["global"];
 		},
 
 		move_program_counter: (state, { payload }: { payload: number }) => {
@@ -95,11 +116,26 @@ const interpreterSlice = createSlice({
 		uninterrupt_program: (state) => {
 			state.interrupted = false;
 		},
+
+		replace_scope_path: (state, { payload }: { payload: string }) => {
+			state.scope_path.pop();
+			state.scope_path.push(payload);
+		},
+
+		add_scope_path: (state, { payload }: { payload: string }) => {
+			state.scope_path.push(payload);
+		},
+		exit_scope: (state) => {
+			state.scope_path.pop();
+		},
+
+		add_instruction: (state, { payload }: { payload: CommandI }) => {
+			state.executable.push(payload);
+		},
 	},
 });
 
 function decode_instructions(index: number, line: string): CommandI | void {
-	// const tokens = line.split(" ");
 	// split characters by spaces except when space is in quotes
 	const tokens = line.match(/["][^"]*["]|['][^']*[']|[^\s]+/g);
 
@@ -146,12 +182,17 @@ function decode_instructions(index: number, line: string): CommandI | void {
 }
 
 export const {
-	generate_instructions,
+	// generate_instructions,
+	setup,
 	move_program_counter,
 	add_variables,
 	add_variable,
 	assign_variable,
 	interrupt_program,
 	uninterrupt_program,
+	replace_scope_path,
+	add_scope_path,
+	exit_scope,
+	add_instruction,
 } = interpreterSlice.actions;
 export default interpreterSlice.reducer;

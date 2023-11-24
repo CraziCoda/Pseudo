@@ -12,6 +12,8 @@ fix load not loading on initial open
 code to read linear code
 fix assigment when there is no space to separare them eg. a=10 *
 take run_program from the reducer and execute it outside *
-work on operators
+work on operators*
 work on assigning variables to variables*
-compare true and false
+compare true and false*
+fix the open folder in menu bar
+fix string coming with =

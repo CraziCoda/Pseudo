@@ -170,6 +170,7 @@ export function print_to_screen(args: string) {
 		values: print_values,
 	};
 
+
 	store.dispatch(add_to_list(output));
 }
 

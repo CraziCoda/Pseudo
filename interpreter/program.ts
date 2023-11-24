@@ -15,12 +15,22 @@ interface token_info {
 	name: string;
 }
 
-type pseudo_actions = "output" | "input" | "variable" | "assignment" | "";
+export type pseudo_actions =
+	| "output"
+	| "input"
+	| "variable"
+	| "assignment"
+	| "jmpif"
+	| "jmpelif"
+	| "jmpend"
+	| "exit_scope"
+	| "";
 
 export interface CommandI {
 	operation: pseudo_actions;
 	args: string;
 	line: number;
+	scope?: string;
 }
 
 export type data_type_t =

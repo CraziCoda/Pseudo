@@ -39,7 +39,7 @@ export function work_on_operations(operation: string) {
 		//@ts-expect-error
 		const err_op = operation.match(/([\d]+[.]?[\d]*|true|false)[(].*/)[0];
 
-		// Add a did you mean section to this
+		// Add a did you mean section to thismatch_string_between_two_characters
 		generic_error(`Unexpected operation: ${err_op}`);
 		return "";
 	}
@@ -443,9 +443,8 @@ function get_all_special_characters(op: string) {
 		/(["][^"]*"|['][^']*')|([+-]?\d+[.]?(\d)*)|(true|false)/g,
 		""
 	);
-
-	if (/[^!()*/%-+><=|&\s]/.test(characters)) {
-		const char = characters.match(/[^!()*/%-+><=|&\s]/)?.[0];
+	if (/[^!()*/%\-+><=|&\s]/.test(characters)) {
+		const char = characters.match(/[^!()*/%\-+><=|&\s]/)?.[0];
 		generic_error(`Unknown character found in opertaion: ${char}`);
 		return true;
 	}

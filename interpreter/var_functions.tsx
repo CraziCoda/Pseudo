@@ -147,7 +147,7 @@ export function assign_var(identifier: string, value: any) {
 				const var_ = current_variables.find((val) => val.name == value);
 
 				if (var_) {
-					console.log(var_, value);
+					// console.log(var_, value);
 					const new_var: VariableI = {
 						type: var_.type,
 						name: identifier,

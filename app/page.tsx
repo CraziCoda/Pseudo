@@ -15,7 +15,6 @@ import { basename } from "path";
 import { read_file } from "@/functions/folder";
 import {
 	assign_variable,
-	generate_instructions,
 	uninterrupt_program,
 } from "@/redux/reducers/interpreter";
 import { execute_instructions } from "@/interpreter/program";
@@ -25,6 +24,7 @@ import {
 	clear_terminal,
 } from "@/redux/reducers/terminal";
 import { input_assignment, variable_assignment } from "@/interpreter/functions";
+import { generate_instructions } from "@/interpreter/generate_instructions";
 
 export default function Main() {
 	const dispatch = useDispatch();
@@ -74,7 +74,8 @@ function Header() {
 		if (active_tab.content) {
 			dispatch(clear_terminal());
 			dispatch(saveContent());
-			dispatch(generate_instructions(active_tab.content));
+			// dispatch(generate_instructions(active_tab.content));
+			generate_instructions(active_tab.content);
 
 			execute_instructions();
 		}
@@ -136,7 +137,7 @@ function Footer() {
 							color: val.isError ? "red" : "inherit",
 						}}
 					>
-						{val.values.join(" ")}
+						{val.values.join("")}
 					</div>
 				) : (
 					<div key={i}>
