@@ -41,8 +41,6 @@ export function generate_instructions(src: string) {
 			store.dispatch(add_instruction(command));
 		});
 	}
-
-	console.log(store.getState().interpreter.executable);
 }
 
 function decode_instruction(line: string, index: number) {

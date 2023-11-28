@@ -1,4 +1,5 @@
 import store from "../redux/store/app";
+import { jmpif, move_to_next_instruction } from "./control_scope_function";
 import {
 	declare_variable,
 	print_to_screen,
@@ -24,13 +25,14 @@ export type pseudo_actions =
 	| "jmpelif"
 	| "jmpend"
 	| "exit_scope"
+	| ""
 	| "";
 
 export interface CommandI {
 	operation: pseudo_actions;
 	args: string;
 	line: number;
-	scope?: string;
+	scope: string;
 }
 
 export type data_type_t =
@@ -113,7 +115,7 @@ export function execute_instructions() {
 	if (program_counter >= executables.length) return;
 
 	const command = executables[program_counter];
-	store.dispatch(move_program_counter(program_counter + 1));
+	// store.dispatch(move_program_counter(program_counter + 1));
 	select_function(command.operation, command.args);
 
 	// console.log(command);
@@ -143,6 +145,7 @@ export function get_keyword_type(token: string): pseudo_actions {
 }
 
 export function select_function(action: pseudo_actions, args: string) {
+	let skip = false;
 	switch (action) {
 		case "output":
 			print_to_screen(args);
@@ -156,10 +159,18 @@ export function select_function(action: pseudo_actions, args: string) {
 		case "assignment":
 			variable_assignment(args);
 			break;
-		case "":
+		case "jmpif":
+			skip = jmpif(args);
+			break;
+		case "jmpelif":
+			skip = jmpif(args);
+			break;
+		case "exit_scope":
 			break;
 		default:
 			console.log("Nothing changed");
 			break;
 	}
+
+	if (!skip) move_to_next_instruction();
 }

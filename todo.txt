@@ -17,3 +17,4 @@ work on assigning variables to variables*
 compare true and false*
 fix the open folder in menu bar
 fix string coming with =
+add >< which is similar to !=

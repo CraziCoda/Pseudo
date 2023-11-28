@@ -97,6 +97,7 @@ function first_precendence(op: string) {
 		} else {
 			// raise error
 			generic_error(`Expected a true or false after !: ${op}`);
+			return "";
 		}
 	}
 	op = second_precedence(op);
@@ -146,7 +147,8 @@ function second_precedence(op: string): string {
 
 				if (operand2 == 0) {
 					// error
-					return op;
+					generic_error("Division by 0");
+					return "";
 				}
 
 				op_copy = op_copy.replace(eq, (operand1 % operand2).toString());
@@ -162,7 +164,8 @@ function second_precedence(op: string): string {
 
 				if (operand2 == 0) {
 					// error
-					return op;
+					generic_error("Division by 0");
+					return "";
 				}
 
 				op_copy = op_copy.replace(eq, (operand1 / operand2).toString());
@@ -251,7 +254,7 @@ function third_precedence(op: string) {
 		}
 	}
 
-	op_copy = op_copy.replaceAll(/^['"]|['"]$/g, "");
+	// op_copy = op_copy.replaceAll(/^['"]|['"]$/g, "");
 
 	op = fourth_precedence(op_copy);
 
@@ -260,6 +263,7 @@ function third_precedence(op: string) {
 
 function fourth_precedence(op: string) {
 	let op_copy = op;
+    
 	const fourth_precedence_regex =
 		/[+-]?[\d]+[.]?([\d])*([<>][=]?)[+-]?[\d]+[.]?([\d])*/;
 
@@ -300,10 +304,10 @@ function fourth_precedence(op: string) {
 				break;
 		}
 
-		// console.log(eq, op_copy);
 	}
 
 	if (/[<>][=]?/.test(op_copy)) {
+		console.log("here");
 		generic_error(`Invalid operation: ${op}`);
 		return "";
 	}
