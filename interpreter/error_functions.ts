@@ -13,7 +13,7 @@ export default function generic_error(msg: string) {
 
 	if (program_counter == 0) return;
 
-	console.log(interpreter.executable, program_counter);
+	// console.log(interpreter.executable, program_counter);
 
 	const current_line = interpreter.executable[program_counter].line;
 

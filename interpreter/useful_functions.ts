@@ -47,7 +47,7 @@ export function work_on_operations(operation: string) {
 	if (get_all_special_characters(operation)) return "";
 
 	const final_op = get_brackets_values(operation);
-	console.log("Final:", final_op);
+	// console.log("Final:", final_op);
 
 	return final_op;
 }
@@ -215,8 +215,6 @@ function third_precedence(op: string) {
 						/(["][^"]*"|['][^']*'|[-]?\d+[.]?\d*|true|false)/g
 					);
 
-					// console.log(op1, op2, operator);
-
 					op1 = op1.replaceAll(/^['"]|['"]$/g, "");
 					op2 = op2.replaceAll(/^['"]|['"]$/g, "");
 
@@ -230,6 +228,8 @@ function third_precedence(op: string) {
 				operand2 = float_regex.test(args[1])
 					? parseFloat(args[1])
 					: parseInt(args[1]);
+
+				// console.log(operand1, operand2, args);
 
 				op_copy = op_copy.replace(eq, (operand1 + operand2).toString());
 				break;
@@ -263,7 +263,7 @@ function third_precedence(op: string) {
 
 function fourth_precedence(op: string) {
 	let op_copy = op;
-    
+
 	const fourth_precedence_regex =
 		/[+-]?[\d]+[.]?([\d])*([<>][=]?)[+-]?[\d]+[.]?([\d])*/;
 
@@ -303,7 +303,6 @@ function fourth_precedence(op: string) {
 
 				break;
 		}
-
 	}
 
 	if (/[<>][=]?/.test(op_copy)) {

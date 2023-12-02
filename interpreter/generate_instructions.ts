@@ -41,22 +41,36 @@ export function generate_instructions(src: string) {
 			store.dispatch(add_instruction(command));
 		});
 	}
+
+	// console.log(store.getState().interpreter.executable);
 }
 
 function decode_instruction(line: string, index: number) {
 	const commands: CommandI[] = [];
 	if (/^[a-zA-Z_]\w*/.test(line)) {
-		const first_token = line.match(/^[a-zA-Z_]\w*/)?.[0] as string;
-
+		const first_token = line
+			?.match(/^[a-zA-Z_]\w*/)?.[0]
+			?.toLowerCase() as string;
 		// Check if it is a keyword
 		if (pseudo_keywords.includes(first_token)) {
 			// work on if keywords
 			const first_token = line
 				.match(/["][^"]*"|['][^']*'|\S+/g)
 				?.join(" ")
-				.match(/^[a-zA-Z_]\w+(\s+if)?/)?.[0] as string;
+				.match(/^[a-zA-Z_]\w+(\s+if)?/)?.[0]
+				?.toLowerCase() as string;
 
 			const if_cond_keywords = ["if", "else if", "else", "endif"];
+
+			const loop_keywords = [
+				"while",
+				"do",
+				"for",
+				"repeat",
+				"until",
+				"endfor",
+				"endwhile",
+			];
 
 			let action: pseudo_actions;
 
@@ -72,9 +86,39 @@ function decode_instruction(line: string, index: number) {
 					action = first_token == "else" ? "jmpend" : "jmpelif";
 				}
 
-				const args = line.replace(/(if|else\s+if|else|endif)\s*/, "");
+				const args = line.replace(/(if|else\s+if|else|endif)\s*/i, "");
 
 				// console.log(action, args, index + 1);
+				commands.push({
+					operation: action,
+					args,
+					line: index + 1,
+					scope: store.getState().interpreter.scope_path.join("/"),
+				});
+			} else if (loop_keywords.includes(first_token)) {
+				let action: pseudo_actions = "";
+
+				if (["do", "for", "repeat"].includes(first_token)) {
+					store.dispatch(add_scope_path(first_token + (index + 1)));
+				} else if (["endfor", "endwhile", "until"].includes(first_token)) {
+					line = line + " " + store.getState().interpreter.scope_path.join("/");
+					action = first_token as pseudo_actions;
+					store.dispatch(exit_scope());
+				} else if (first_token == "while") {
+					const current_scope = store
+						.getState()
+						.interpreter.scope_path.join("/");
+					const last = current_scope.split("/").pop();
+
+					if (last?.includes("do")) {
+					} else {
+						store.dispatch(add_scope_path(first_token + (index + 1)));
+						action = "startwhile";
+					}
+				}
+
+				const args = line.replace(first_token, "");
+
 				commands.push({
 					operation: action,
 					args,
@@ -96,7 +140,7 @@ function decode_instruction(line: string, index: number) {
 				});
 			}
 		} else if (identifier_regex.test(first_token)) {
-			const second_token = line.split(" ")[1];
+			const second_token = line?.split(" ")[1];
 
 			if (second_token == "=") {
 				const args = line.replace(/=/, "");
@@ -109,5 +153,6 @@ function decode_instruction(line: string, index: number) {
 			}
 		}
 	}
+
 	return commands;
 }

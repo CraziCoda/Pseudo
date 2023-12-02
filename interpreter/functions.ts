@@ -116,6 +116,7 @@ export function variable_assignment(args: string) {
 
 	const value = args_s.join("").trim();
 
+
 	assign_var(identifier, value);
 }
 

@@ -1,5 +1,10 @@
 import store from "../redux/store/app";
-import { jmpif, move_to_next_instruction } from "./control_scope_function";
+import {
+	jmp_to_loop_start,
+	jmp_while,
+	jmpif,
+	move_to_next_instruction,
+} from "./control_scope_function";
 import {
 	declare_variable,
 	print_to_screen,
@@ -25,7 +30,8 @@ export type pseudo_actions =
 	| "jmpelif"
 	| "jmpend"
 	| "exit_scope"
-	| ""
+	| "startwhile"
+	| "endwhile"
 	| "";
 
 export interface CommandI {
@@ -56,8 +62,8 @@ export const pseudo_data_type: data_type_t[] = [
 
 export const identifier_regex = /^[a-zA-Z_]\w*$/;
 export const number_regex = /^[+-]?\d+[.]?(\d)*$/;
-export const integer_regex = /^-?\d+$/;
-export const float_regex = /-?\d+\.\d+$/;
+export const integer_regex = /^[-+]?\d+$/;
+export const float_regex = /^[+-]?\d+\.\d+$/;
 // export const string_regex = /(['"])(.*?)\1$/;
 export const string_regex = /^["][^"]*"$|^['][^']*'$/;
 export const comma_regex =
@@ -164,6 +170,14 @@ export function select_function(action: pseudo_actions, args: string) {
 			break;
 		case "jmpelif":
 			skip = jmpif(args);
+			break;
+		case "startwhile":
+			skip = jmp_while(args);
+			break;
+		case "endwhile":
+			// console.log("Yes");
+			jmp_to_loop_start(args);
+			skip = true;
 			break;
 		case "exit_scope":
 			break;
