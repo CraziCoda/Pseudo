@@ -161,7 +161,7 @@ export function assign_var(identifier: string, value: any) {
 			} else if (fn_identifier_regex.test(value)) {
 				// console.log(value);
 			} else {
-				console.log(value);
+				// console.log(value);
 				const op_value = place_in_variables(value);
 				const op_value_type = detect_data_type(op_value);
 

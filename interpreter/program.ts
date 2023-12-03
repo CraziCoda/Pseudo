@@ -32,7 +32,9 @@ export type pseudo_actions =
 	| "exit_scope"
 	| "startwhile"
 	| "endwhile"
-	| "";
+	| "startfor"
+	| "endfor"
+	| ""
 
 export interface CommandI {
 	operation: pseudo_actions;
@@ -115,18 +117,21 @@ export const pseudo_keyword_type = {
 };
 
 export function execute_instructions() {
-	const program_counter = store.getState().interpreter.program_counter;
+	let program_counter = store.getState().interpreter.program_counter;
 	const executables = store.getState().interpreter.executable;
 
-	if (program_counter >= executables.length) return;
+	while (program_counter < executables.length) {
+		console.log(program_counter);
 
-	const command = executables[program_counter];
-	// store.dispatch(move_program_counter(program_counter + 1));
-	select_function(command.operation, command.args);
+		const command = executables[program_counter];
+		select_function(command.operation, command.args);
 
-	// console.log(command);
+		program_counter = store.getState().interpreter.program_counter;
 
-	if (!store.getState().interpreter.interrupted) execute_instructions();
+		if (store.getState().interpreter.interrupted) {
+			break;
+		}
+	}
 }
 
 export function idenitfy_token(token: string): token_info | null {

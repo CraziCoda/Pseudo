@@ -42,12 +42,12 @@ export function move_to_next_instruction() {
 	const next_instruction =
 		store.getState().interpreter.executable[program_counter + 1];
 
-	const current_scope = current_instruction.scope.split("/");
+	const current_scope = current_instruction?.scope?.split("/");
 	const next_scope = next_instruction?.scope?.split("/");
 
 	if (
-		current_scope.length == next_scope?.length &&
-		current_scope.join("/") != next_scope?.join("/")
+		current_scope?.length == next_scope?.length &&
+		current_scope?.join("/") != next_scope?.join("/")
 	) {
 		current_scope.pop();
 		lookup_scope(current_scope.join("/"), program_counter);
