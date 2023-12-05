@@ -98,7 +98,15 @@ function decode_instruction(line: string, index: number) {
 			} else if (loop_keywords.includes(first_token)) {
 				let action: pseudo_actions = "";
 
+				const token_action = {
+					for: "startfor",
+					do: "start_do",
+					repeat: "start_repeat",
+				};
+
 				if (["do", "for", "repeat"].includes(first_token)) {
+					//@ts-expect-error
+					action = token_action[first_token];
 					store.dispatch(add_scope_path(first_token + (index + 1)));
 				} else if (["endfor", "endwhile", "until"].includes(first_token)) {
 					line = line + " " + store.getState().interpreter.scope_path.join("/");
@@ -118,6 +126,8 @@ function decode_instruction(line: string, index: number) {
 				}
 
 				const args = line.replace(first_token, "");
+
+				// console.log(action, args);
 
 				commands.push({
 					operation: action,

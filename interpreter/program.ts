@@ -1,5 +1,8 @@
+import { a } from "@tauri-apps/api/app-5190a154";
 import store from "../redux/store/app";
 import {
+	jmp_for,
+	jmp_to_for_start,
 	jmp_to_loop_start,
 	jmp_while,
 	jmpif,
@@ -34,7 +37,7 @@ export type pseudo_actions =
 	| "endwhile"
 	| "startfor"
 	| "endfor"
-	| ""
+	| "";
 
 export interface CommandI {
 	operation: pseudo_actions;
@@ -121,7 +124,7 @@ export function execute_instructions() {
 	const executables = store.getState().interpreter.executable;
 
 	while (program_counter < executables.length) {
-		console.log(program_counter);
+		// console.log(program_counter);
 
 		const command = executables[program_counter];
 		select_function(command.operation, command.args);
@@ -185,6 +188,12 @@ export function select_function(action: pseudo_actions, args: string) {
 			skip = true;
 			break;
 		case "exit_scope":
+			break;
+		case "startfor":
+			jmp_for(args);
+			break;
+		case "endfor":
+			jmp_to_for_start(args);
 			break;
 		default:
 			console.log("Nothing changed");

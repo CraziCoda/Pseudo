@@ -1,4 +1,4 @@
-import { place_in_variables } from "./var_functions";
+import { assign_var, place_in_variables } from "./var_functions";
 import store from "../redux/store/app";
 import { move_program_counter } from "@/redux/reducers/interpreter";
 import generic_error from "./error_functions";
@@ -95,8 +95,8 @@ export function jmp_while(args: string) {
 }
 
 export function jmp_to_loop_start(args: string) {
-	const program_counter = store.getState().interpreter.program_counter;
-	const instruction = store.getState().interpreter.executable[program_counter];
+	// const program_counter = store.getState().interpreter.program_counter;
+	// const instruction = store.getState().interpreter.executable[program_counter];
 	const current_scope = args.trim();
 
 	const instructions = store.getState().interpreter.executable;
@@ -112,6 +112,99 @@ export function jmp_to_loop_start(args: string) {
 
 		if (!prev_scope.includes(current_scope)) {
 			store.dispatch(move_program_counter(i));
+			break;
+		}
+	}
+}
+
+export function jmp_for(args: string) {
+	args = args.trim();
+	if (
+		/^[a-zA-Z]\w*\s*=\s*[\-+]?\s*\d+[.]?\d*\s*to\s*[\-+]?\s*\d+[.]?\d*\s*step\s*[\-+]?\s*\d+[.]?\d*/i.test(
+			args
+		)
+	) {
+		const initializing = args
+			.match(/[a-zA-Z]\w*\s*=\s*\d+[.]?\d*\s*/)?.[0]
+			.replace(/\s+/g, "") as string;
+
+		const [identifier, value] = initializing.split("=");
+
+		assign_var(identifier, value);
+		const current_variables = store.getState().interpreter.variables;
+		const program_counter = store.getState().interpreter.program_counter;
+
+		const pseudo_var = current_variables.find((val) => val.name == identifier);
+
+		const end = args.match(/(?<=to\s*)[+-]?\d+[.]?\d*/i)?.[0] as string;
+
+		if (pseudo_var?.value == parseFloat(end)) {
+			const current_scope =
+				store.getState().interpreter.executable[program_counter].scope;
+
+			const instructions = store.getState().interpreter.executable;
+
+			for (let i = 0; i < instructions.length; i++) {
+				if (!instructions[i].scope.includes(current_scope)) {
+					store.dispatch(move_program_counter(i + 1));
+					break;
+				}
+			}
+		}
+	} else {
+		//raise error
+		generic_error("Invalid for loop");
+	}
+}
+
+export function jmp_to_for_start(args: string) {
+	const program_counter = store.getState().interpreter.program_counter;
+	const current_scope = args.trim();
+	const instructions = store.getState().interpreter.executable;
+	const current_variables = store.getState().interpreter.variables;
+
+	for (let i = instructions.length - 2; i >= 0; i--) {
+
+		const prev_scope = instructions[i - 1]?.scope || "a";
+
+		if (!prev_scope.includes(current_scope)) {
+			const for_instruction = instructions[i];
+			const identifier = for_instruction.args.trim().match(/^[a-zA-Z]\w*/)?.[0];
+
+			const step = for_instruction.args
+				.trim()
+				.match(/(?<=step\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0] as string;
+
+			const to = for_instruction.args
+				.trim()
+				.match(/(?<=to\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0] as string;
+
+			const from = for_instruction.args
+				.trim()
+				.match(/(?<=\=\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0]
+				.trim() as string;
+
+			const pseudo_var = current_variables.find(
+				(val) => val.name == identifier
+			);
+
+			const direction =
+				parseFloat(to) - parseFloat(from) >= 0 ? "right" : "left";
+
+			if (
+				(pseudo_var?.value < parseFloat(to) && direction == "right") ||
+				(pseudo_var?.value > parseFloat(to) && direction == "left")
+			) {
+				const new_value =
+					pseudo_var?.value + parseFloat(step.replace(/\s*/g, ""));
+
+				assign_var(pseudo_var?.name as string, new_value);
+
+				store.dispatch(move_program_counter(i));
+			} else {
+				// raise error
+			}
+
 			break;
 		}
 	}

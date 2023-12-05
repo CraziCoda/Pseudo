@@ -20,7 +20,7 @@ export function assign_var(identifier: string, value: any) {
 	const pseudo_var = current_variables.find((val) => val.name == identifier);
 
 	if (pseudo_var) {
-		if (value != "") {
+		if (value !== "" ) {
 			if (integer_regex.test(value)) {
 				if (
 					pseudo_var.type == "integer" ||
@@ -105,6 +105,7 @@ export function assign_var(identifier: string, value: any) {
 			}
 		} else {
 			// no value error
+			console.log(value);
 			generic_error("Expected a value after '='");
 		}
 	} else {
