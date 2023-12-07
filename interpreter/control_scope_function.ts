@@ -119,13 +119,26 @@ export function jmp_to_loop_start(args: string) {
 
 export function jmp_for(args: string) {
 	args = args.trim();
+	const initial = place_in_variables(
+		args.match(/(?<=\=\s*).*(?=to)/i)?.[0] as string
+	);
+	args = args.replace(/(?<=\=\s*).*(?=to)/i, initial);
+
+	const dest = place_in_variables(
+		args.match(/(?<=to\s*).*(?=step)/i)?.[0] as string
+	);
+	args = args.replace(/(?<=to\s*).*(?=step)/i, dest);
+
+	const move = place_in_variables(args.match(/(?<=step\s*).*/i)?.[0] as string);
+	args = args.replace(/(?<=step\s*).*/i, move);
+
 	if (
 		/^[a-zA-Z]\w*\s*=\s*[\-+]?\s*\d+[.]?\d*\s*to\s*[\-+]?\s*\d+[.]?\d*\s*step\s*[\-+]?\s*\d+[.]?\d*/i.test(
 			args
 		)
 	) {
 		const initializing = args
-			.match(/[a-zA-Z]\w*\s*=\s*\d+[.]?\d*\s*/)?.[0]
+			.match(/[a-zA-Z]\w*\s*=\s*[\-+]?\s*\d+[.]?\d*/)?.[0]
 			.replace(/\s+/g, "") as string;
 
 		const [identifier, value] = initializing.split("=");
@@ -163,33 +176,48 @@ export function jmp_to_for_start(args: string) {
 	const instructions = store.getState().interpreter.executable;
 	const current_variables = store.getState().interpreter.variables;
 
-	for (let i = instructions.length - 2; i >= 0; i--) {
-
+	for (let i = program_counter; i >= 0; i--) {
 		const prev_scope = instructions[i - 1]?.scope || "a";
 
 		if (!prev_scope.includes(current_scope)) {
 			const for_instruction = instructions[i];
 			const identifier = for_instruction.args.trim().match(/^[a-zA-Z]\w*/)?.[0];
+			args = for_instruction.args;
 
-			const step = for_instruction.args
+			// place in variables
+
+			const initial = place_in_variables(
+				args.match(/(?<=\=\s*).*(?=to)/i)?.[0] as string
+			);
+			args = args.replace(/(?<=\=\s*).*(?=to)/i, initial);
+			const dest = place_in_variables(
+				args.match(/(?<=to\s*).*(?=step)/i)?.[0] as string
+			);
+			args = args.replace(/(?<=to\s*).*(?=step)/i, dest);
+			const move = place_in_variables(
+				args.match(/(?<=step\s*).*/i)?.[0] as string
+			);
+			args = args.replace(/(?<=step\s*).*/i, move);
+
+			const step = args
 				.trim()
 				.match(/(?<=step\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0] as string;
 
-			const to = for_instruction.args
+			const to = args
 				.trim()
-				.match(/(?<=to\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0] as string;
+				.match(/(?<=to\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0]
+				.replace(/\s*/g, "") as string;
 
-			const from = for_instruction.args
+			const from = args
 				.trim()
 				.match(/(?<=\=\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0]
-				.trim() as string;
+				.replace(/\s*/g, "") as string;
 
 			const pseudo_var = current_variables.find(
 				(val) => val.name == identifier
 			);
 
-			const direction =
-				parseFloat(to) - parseFloat(from) >= 0 ? "right" : "left";
+			const direction = parseFloat(to) > parseFloat(from) ? "right" : "left";
 
 			if (
 				(pseudo_var?.value < parseFloat(to) && direction == "right") ||
@@ -203,9 +231,45 @@ export function jmp_to_for_start(args: string) {
 				store.dispatch(move_program_counter(i));
 			} else {
 				// raise error
+				// console.log(pseudo_var);
 			}
 
 			break;
+		}
+	}
+}
+
+export function jmp_to_do_start(args: string) {
+	const scope = args.trim().match(/global.*$/)?.[0] as string;
+	const eq = args.trim().replace(scope, "");
+    
+    if(eq == ''){
+        return generic_error("Expected a condition")
+    }
+	const op_ans = place_in_variables(eq);
+	const program_counter = store.getState().interpreter.program_counter;
+
+
+    console.log(program_counter, eq)
+
+	const cond = op_ans == "false" || op_ans == "0" ? false : true;
+
+	if (cond) {
+		const instructions = store.getState().interpreter.executable;
+
+		for (let i = program_counter; i >= 0; i--) {
+			if (i <= 0) {
+				// console.log(i);
+				store.dispatch(move_program_counter(0));
+				break;
+			}
+
+			const prev_scope = instructions[i - 1].scope;
+
+			if (!prev_scope.includes(scope)) {
+				store.dispatch(move_program_counter(i));
+				break;
+			}
 		}
 	}
 }

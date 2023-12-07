@@ -2,6 +2,7 @@ import { a } from "@tauri-apps/api/app-5190a154";
 import store from "../redux/store/app";
 import {
 	jmp_for,
+	jmp_to_do_start,
 	jmp_to_for_start,
 	jmp_to_loop_start,
 	jmp_while,
@@ -35,8 +36,13 @@ export type pseudo_actions =
 	| "exit_scope"
 	| "startwhile"
 	| "endwhile"
+	| "whileend"
 	| "startfor"
 	| "endfor"
+	| "startdo"
+	| "enddo"
+	| "until"
+	| "startrepeat"
 	| "";
 
 export interface CommandI {
@@ -191,9 +197,21 @@ export function select_function(action: pseudo_actions, args: string) {
 			break;
 		case "startfor":
 			jmp_for(args);
+			// console.log(args);
 			break;
 		case "endfor":
 			jmp_to_for_start(args);
+			break;
+		case "startdo":
+			break;
+		case "enddo":
+			jmp_to_do_start(args);
+			break;
+		case "startrepeat":
+			break;
+		case "until":
+			jmp_to_do_start(args);
+			// console.log(args);
 			break;
 		default:
 			console.log("Nothing changed");

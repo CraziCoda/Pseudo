@@ -35,6 +35,8 @@ export function generate_instructions(src: string) {
 		// line = line.replace(/\s+/g, " ");
 		line = line.match(/["][^"]*"|['][^']*'|\S+/g)?.join(" ") as string;
 
+		line = format_lines(line);
+
 		const commands = decode_instruction(line, i);
 
 		commands.forEach((command) => {
@@ -43,6 +45,17 @@ export function generate_instructions(src: string) {
 	}
 
 	// console.log(store.getState().interpreter.executable);
+}
+
+function format_lines(line: string) {
+	let new_line = line.replace(/^whileend/i, "endwhile");
+
+	new_line = new_line.replace(
+		/(integer|float|string|double|bool|boolean|char)s/i,
+		"$1"
+	);
+
+	return new_line;
 }
 
 function decode_instruction(line: string, index: number) {
@@ -100,8 +113,8 @@ function decode_instruction(line: string, index: number) {
 
 				const token_action = {
 					for: "startfor",
-					do: "start_do",
-					repeat: "start_repeat",
+					do: "startdo",
+					repeat: "startrepeat",
 				};
 
 				if (["do", "for", "repeat"].includes(first_token)) {
@@ -119,15 +132,17 @@ function decode_instruction(line: string, index: number) {
 					const last = current_scope.split("/").pop();
 
 					if (last?.includes("do")) {
+						line =
+							line + " " + store.getState().interpreter.scope_path.join("/");
+						store.dispatch(exit_scope());
+						action = "enddo";
 					} else {
 						store.dispatch(add_scope_path(first_token + (index + 1)));
 						action = "startwhile";
 					}
 				}
 
-				const args = line.replace(first_token, "");
-
-				// console.log(action, args);
+				const args = line.replace(/^[a-zA-Z]\w*/, "");
 
 				commands.push({
 					operation: action,
