@@ -1,6 +1,6 @@
 "use client";
 import tabs, { ITab, addTab, closeTab } from "@/redux/reducers/tabs";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect,  useRef, useState } from "react";
 import {
 	IoMdArrowDropright,
 	IoMdArrowDropdown,

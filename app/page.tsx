@@ -8,8 +8,8 @@ import {
 } from "@/redux/reducers/tabs";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { IoMdClose } from "react-icons/io";
-import { BsPlay, BsDot, BsBasket } from "react-icons/bs";
+import { IoMdClose, IoIosRemove } from "react-icons/io";
+import { BsPlay, BsDot } from "react-icons/bs";
 import CodeEditor from "@/components/Editor";
 import { basename } from "path";
 import { read_file } from "@/functions/folder";
@@ -48,7 +48,7 @@ export default function Main() {
 	}, [tabs.active]);
 
 	return (
-		<main className="flex h-screen w-full flex-col bg-zinc-800">
+		<main className="flex h-screen w-screen flex-col bg-zinc-800 overflow-hidden">
 			<>
 				<Header />
 			</>
@@ -83,25 +83,34 @@ function Header() {
 
 	return (
 		<header className="flex flex-row w-full h-8 p-0 m-0 border-b border-black justify-between items-center pr-2 bg-zinc-900">
-			<div className=" flex flex-row p-0 m-0">
-				{tabs.tabs?.map((val, i) => {
-					return (
-						<Tab
-							name={basename(val.path)}
-							index={i}
-							active={tabs.active == i}
-							key={i}
-							saved={val.saved}
-						/>
-					);
-				})}
+			<div className=" flex flex-row w-11/12 p-0 m-0 overflow-x-auto ">
+				<div className="flex flex-row">
+					{tabs.tabs?.map((val, i) => {
+						return (
+							<Tab
+								name={basename(val.path)}
+								index={i}
+								active={tabs.active == i}
+								key={i}
+								saved={val.saved}
+							/>
+						);
+					})}
+				</div>
 			</div>
 			<div className="flex flex-row">
 				<BsPlay
-					size={20}
+					size={25}
 					color="white"
-					className="cursor-pointer"
+					className="cursor-pointer mr-2"
 					onClick={execute}
+				/>
+
+				<IoIosRemove
+					size={25}
+					color="white"
+					className="cursor-pointer mr-2"
+					onClick={() => dispatch(clear_terminal())}
 				/>
 			</div>
 		</header>

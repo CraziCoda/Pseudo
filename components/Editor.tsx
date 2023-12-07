@@ -14,6 +14,10 @@ export default function CodeEditor() {
 	const [save, setSave] = useState(false);
 
 	useEffect(() => {
+		// setText()s
+	}, [tabs.active]);
+
+	useEffect(() => {
 		if (save) save_file();
 		setSave(false);
 	}, [current_text]);
@@ -68,8 +72,7 @@ export default function CodeEditor() {
 			}}
 			onChange={(text) => {
 				if (text) {
-					dispatch(editContent(text));
-				}
+					dispatch(editContent(text));				}
 			}}
 		/>
 	);

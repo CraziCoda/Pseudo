@@ -40,39 +40,6 @@ const interpreterSlice = createSlice({
 	initialState: iniitialState,
 
 	reducers: {
-		generate_instructions: (state, { payload }: { payload: string }) => {
-			state.source_code = payload;
-			state.interrupted = false;
-			state.program_counter = 0;
-			state.variables = [];
-			state.executable = [];
-			state.current_scope = "global";
-
-			const lines = payload.split("\n");
-
-			payload = payload.replace(/\/\/.*/g, "");
-
-			for (let i = 0; i < lines.length; i++) {
-				let line = lines[i];
-				// this will clear source code given
-				if (line.startsWith("//") || line == "") return;
-
-				// trim and remove comments
-				line = line.trim().replace(/\/\/.*/g, "");
-
-				// excess spaces
-				// line = line.replace(/\s+/g, " ");
-				line = line.match(/["][^"]*"|['][^']*'|\S+/g)?.join(" ") as string;
-
-				// seperate combined characters
-				line = line.replace(/([^\w"']+|["][^"]*["]|['][^']*['])/g, " $1 ");
-
-				// const command = decode_instructions(i, line);
-
-				// if (command) state.executable.push(command);
-			}
-		},
-
 		setup: (state, { payload }: { payload: string }) => {
 			state.source_code = payload;
 			state.interrupted = false;
@@ -134,52 +101,6 @@ const interpreterSlice = createSlice({
 		},
 	},
 });
-
-// function decode_instructions(index: number, line: string): CommandI | void {
-// 	// split characters by spaces except when space is in quotes
-// 	const tokens = line.match(/["][^"]*["]|['][^']*[']|[^\s]+/g);
-
-// 	if (tokens == null) return;
-
-// 	const token_1 = idenitfy_token(tokens[0]);
-
-// 	if (token_1?.type == "keyword") {
-// 		const k_type = get_keyword_type(token_1.name);
-
-// 		// remove the command
-// 		tokens.shift();
-
-// 		const args = tokens.join(" ");
-
-// 		const command: CommandI = {
-// 			operation: k_type,
-// 			args,
-// 			line: index + 1,
-// 		};
-
-// 		return command;
-
-// 		// console.log(command);
-// 	} else if (token_1?.type == "identifier" && tokens.length >= 2) {
-// 		const token_2 = tokens[1];
-
-// 		// remove identifier
-// 		tokens.shift();
-
-// 		if (token_2 == "=") {
-// 			// remove '='
-// 			tokens.shift();
-
-// 			const args = token_1.name + " " + tokens.join(" ");
-// 			const command: CommandI = {
-// 				operation: "assignment",
-// 				args,
-// 				line: index + 1,
-// 			};
-// 			return command;
-// 		}
-// 	}
-// }
 
 export const {
 	// generate_instructions,

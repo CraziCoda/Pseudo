@@ -83,15 +83,8 @@ const tabsSlice = createSlice({
 	},
 });
 
-export const {
-	closeTab,
-	openTab,
-	addTab,
-	editContent,
-	saveContent,
-} = tabsSlice.actions;
+export const { closeTab, openTab, addTab, editContent, saveContent } =
+	tabsSlice.actions;
 
 export default tabsSlice.reducer;
-function err(reason: any): PromiseLike<never> {
-	throw new Error("Function not implemented.");
-}
+

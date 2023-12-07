@@ -6,16 +6,16 @@ add functions delete file *
 add function to add new file * 
 highlight numbers in monaco *
 start trials on a basic compiler*
-fix the issue with resizing
-make the tabs pane scrollable
-fix load not loading on initial open
-code to read linear code
+fix the issue with resizing *
+make the tabs pane scrollable *
+fix load not loading on initial open *
+code to read linear code 
 fix assigment when there is no space to separare them eg. a=10 *
 take run_program from the reducer and execute it outside *
 work on operators*
 work on assigning variables to variables*
 compare true and false*
-fix the open folder in menu bar
-fix string coming with =
+fix the open folder in menu bar 
+fix string coming with = *
 add >< which is similar to !=
-remove recursive code execution
+remove recursive code execution *
