@@ -126,21 +126,36 @@ export const pseudo_keyword_type = {
 };
 
 export function execute_instructions() {
-	let program_counter = store.getState().interpreter.program_counter;
+	// let program_counter = store.getState().interpreter.program_counter;
 	const executables = store.getState().interpreter.executable;
 
-	while (program_counter < executables.length) {
-		// console.log(program_counter);
+	// while (program_counter < executables.length) {
+	// 	// console.log(program_counter);
 
+	// 	const command = executables[program_counter];
+	// 	// setTimeout(() => console.log("Hello"), 1);
+	// 	select_function(command.operation, command.args);
+
+	// 	program_counter = store.getState().interpreter.program_counter;
+
+	// 	if (store.getState().interpreter.interrupted) {
+	// 		break;
+	// 	}
+	// }
+
+	function call_select() {
+		const program_counter = store.getState().interpreter.program_counter;
 		const command = executables[program_counter];
-		select_function(command.operation, command.args);
 
-		program_counter = store.getState().interpreter.program_counter;
-
-		if (store.getState().interpreter.interrupted) {
-			break;
+		if (program_counter >= executables.length) {
+			clearInterval(id);
+            return
 		}
+
+		select_function(command.operation, command.args);
 	}
+
+	const id = setInterval(call_select, 1);
 }
 
 export function idenitfy_token(token: string): token_info | null {
@@ -189,7 +204,6 @@ export function select_function(action: pseudo_actions, args: string) {
 			skip = jmp_while(args);
 			break;
 		case "endwhile":
-			// console.log("Yes");
 			jmp_to_loop_start(args);
 			skip = true;
 			break;
@@ -197,7 +211,6 @@ export function select_function(action: pseudo_actions, args: string) {
 			break;
 		case "startfor":
 			jmp_for(args);
-			// console.log(args);
 			break;
 		case "endfor":
 			jmp_to_for_start(args);

@@ -48,9 +48,9 @@ export function generate_instructions(src: string) {
 }
 
 function format_lines(line: string) {
-	let new_line = line.replace(/^whileend/i, "endwhile");
+	let new_line = line?.replace(/^whileend/i, "endwhile");
 
-	new_line = new_line.replace(
+	new_line = new_line?.replace(
 		/(integer|float|string|double|bool|boolean|char)s/i,
 		"$1"
 	);
