@@ -17,7 +17,10 @@ import {
 } from "./functions";
 import {
 	IInterpreterSlice,
+	exit_debug_mode,
 	move_program_counter,
+	run_executables,
+	uninterrupt_program,
 } from "@/redux/reducers/interpreter";
 
 interface token_info {
@@ -129,33 +132,62 @@ export function execute_instructions() {
 	// let program_counter = store.getState().interpreter.program_counter;
 	const executables = store.getState().interpreter.executable;
 
-	// while (program_counter < executables.length) {
-	// 	// console.log(program_counter);
-
-	// 	const command = executables[program_counter];
-	// 	// setTimeout(() => console.log("Hello"), 1);
-	// 	select_function(command.operation, command.args);
-
-	// 	program_counter = store.getState().interpreter.program_counter;
-
-	// 	if (store.getState().interpreter.interrupted) {
-	// 		break;
-	// 	}
-	// }
-
 	function call_select() {
+		if (store.getState().interpreter.interrupted) {
+			clearInterval(id);
+			return;
+		}
 		const program_counter = store.getState().interpreter.program_counter;
 		const command = executables[program_counter];
 
 		if (program_counter >= executables.length) {
 			clearInterval(id);
-            return
+			return;
 		}
 
 		select_function(command.operation, command.args);
 	}
 
-	const id = setInterval(call_select, 1);
+	const id = setInterval(call_select, 0);
+}
+
+export function execute_instructions_timed(time: number) {
+	store.dispatch(run_executables());
+	store.dispatch(uninterrupt_program());
+	const executables = store.getState().interpreter.executable;
+
+	function call_select() {
+		if (store.getState().interpreter.interrupted) {
+			clearInterval(id);
+			return;
+		}
+		const program_counter = store.getState().interpreter.program_counter;
+
+		if (program_counter >= executables.length) {
+			clearInterval(id);
+			return;
+		}
+		const command = executables[program_counter];
+
+		select_function(command.operation, command.args);
+	}
+
+	const id = setInterval(call_select, time * 1000);
+}
+export function execute_instructions_step() {
+	const executables = store.getState().interpreter.executable;
+	const program_counter = store.getState().interpreter.program_counter;
+	if (store.getState().interpreter.interrupted) {
+		return;
+	}
+	if (program_counter >= executables.length) {
+		store.dispatch(exit_debug_mode());
+		return;
+	}
+
+	const command = executables[program_counter];
+
+	select_function(command.operation, command.args);
 }
 
 export function idenitfy_token(token: string): token_info | null {

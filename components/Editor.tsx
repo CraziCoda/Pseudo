@@ -60,7 +60,7 @@ export default function CodeEditor() {
 
 	return (
 		<Editor
-			className="flex overflow-y-auto"
+			className="flex overflow-y-auto bg-red-800"
 			height="100%"
 			defaultLanguage="pseudocode"
 			defaultValue="// some comment"
@@ -72,7 +72,19 @@ export default function CodeEditor() {
 			}}
 			onChange={(text) => {
 				if (text) {
-					dispatch(editContent(text));				}
+					dispatch(editContent(text));
+				}
+			}}
+			onMount={(editor, monaco) => {
+				const decoration = {
+					range: new monaco.Range(2, 1, 2, 1),
+					options: {
+						isWholeLine: true,
+						className: "",
+					},
+				};
+
+                editor.createDecorationsCollection([decoration]);
 			}}
 		/>
 	);

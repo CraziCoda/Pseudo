@@ -9,15 +9,24 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IoMdClose, IoIosRemove } from "react-icons/io";
+import { VscDebug, VscDebugAlt, VscDebugAltSmall } from "react-icons/vsc";
+import { MdClear } from "react-icons/md";
 import { BsPlay, BsDot } from "react-icons/bs";
 import CodeEditor from "@/components/Editor";
 import { basename } from "path";
 import { read_file } from "@/functions/folder";
 import {
+	IInterpreterSlice,
 	assign_variable,
+	enter_debug_mode,
+	exit_debug_mode,
+	interrupt_program,
 	uninterrupt_program,
 } from "@/redux/reducers/interpreter";
-import { execute_instructions } from "@/interpreter/program";
+import {
+	execute_instructions,
+	execute_instructions_timed,
+} from "@/interpreter/program";
 import {
 	ITerminalSlice,
 	change_current_input_to_output,
@@ -25,6 +34,7 @@ import {
 } from "@/redux/reducers/terminal";
 import { input_assignment, variable_assignment } from "@/interpreter/functions";
 import { generate_instructions } from "@/interpreter/generate_instructions";
+import DebugControl from "@/components/DebugControl";
 
 export default function Main() {
 	const dispatch = useDispatch();
@@ -52,6 +62,7 @@ export default function Main() {
 			<>
 				<Header />
 			</>
+			<DebugControl />
 			<div className="flex h-4/6" style={{ width: "99%" }}>
 				{/* This should work for now */}
 				{tabs.tabs[tabs.active].path == "default" ? "" : <CodeEditor />}
@@ -65,6 +76,9 @@ function Header() {
 	const tabs = useSelector(
 		({ tabs }: { tabs: { tabs: ITab[]; active: number } }) => tabs
 	);
+	const interpreter = useSelector(
+		({ interpreter }: { interpreter: IInterpreterSlice }) => interpreter
+	);
 
 	const dispatch = useDispatch();
 
@@ -74,11 +88,25 @@ function Header() {
 		if (active_tab.content) {
 			dispatch(clear_terminal());
 			dispatch(saveContent());
-			// dispatch(generate_instructions(active_tab.content));
 			generate_instructions(active_tab.content);
-
 			execute_instructions();
 		}
+	}
+
+	function activate_debug() {
+		const active_tab = tabs.tabs[tabs.active];
+		if (active_tab.content) {
+			dispatch(clear_terminal());
+			dispatch(saveContent());
+			generate_instructions(active_tab.content);
+			dispatch(enter_debug_mode());
+		}
+	}
+
+	function end_execution() {
+		dispatch(exit_debug_mode());
+		dispatch(clear_terminal());
+		dispatch(interrupt_program());
 	}
 
 	return (
@@ -98,19 +126,27 @@ function Header() {
 					})}
 				</div>
 			</div>
-			<div className="flex flex-row">
+			<div className="flex flex-row justify-center items-center">
 				<BsPlay
 					size={25}
 					color="white"
 					className="cursor-pointer mr-2"
 					onClick={execute}
 				/>
+				<VscDebug
+					size={20}
+					color={`${interpreter.debug ? "grey" : "white"}`}
+					className={`${
+						interpreter.debug ? "cursor-auto" : "cursor-pointer"
+					} mr-2`}
+					onClick={activate_debug}
+				/>
 
-				<IoIosRemove
+				<MdClear
 					size={25}
 					color="white"
 					className="cursor-pointer mr-2"
-					onClick={() => dispatch(clear_terminal())}
+					onClick={end_execution}
 				/>
 			</div>
 		</header>
@@ -121,6 +157,10 @@ function Footer() {
 	const input_ref = useRef<HTMLInputElement | null>(null);
 	const terminal_ref = useRef<HTMLDivElement | null>(null);
 	const dispatch = useDispatch();
+
+	const interpreter = useSelector(
+		({ interpreter }: { interpreter: IInterpreterSlice }) => interpreter
+	);
 
 	const terminal = useSelector(
 		({ terminal }: { terminal: ITerminalSlice }) => terminal
@@ -176,7 +216,10 @@ function Footer() {
 									dispatch(
 										change_current_input_to_output(e.currentTarget.value)
 									);
-									execute_instructions();
+									if (interpreter.running_state == "normal")
+										execute_instructions();
+									else if (interpreter.running_state == "timed")
+										execute_instructions_timed(interpreter.execution_time || 0);
 								}
 							}}
 						/>

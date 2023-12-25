@@ -23,6 +23,10 @@ export interface IInterpreterSlice {
 	current_scope: string;
 	interrupted: boolean;
 	scope_path: string[];
+	debug: boolean;
+	running: boolean;
+	running_state: "normal" | "timed" | "step";
+	execution_time?: number;
 }
 
 const iniitialState: IInterpreterSlice = {
@@ -33,6 +37,9 @@ const iniitialState: IInterpreterSlice = {
 	current_scope: "global",
 	interrupted: false,
 	scope_path: ["global"],
+	debug: false,
+	running: false,
+	running_state: "normal",
 };
 
 const interpreterSlice = createSlice({
@@ -48,6 +55,8 @@ const interpreterSlice = createSlice({
 			state.executable = [];
 			state.current_scope = "global";
 			state.scope_path = ["global"];
+			state.running_state = "normal";
+			state.running = false;
 		},
 
 		move_program_counter: (state, { payload }: { payload: number }) => {
@@ -78,10 +87,12 @@ const interpreterSlice = createSlice({
 
 		interrupt_program: (state) => {
 			state.interrupted = true;
+			state.running = false;
 		},
 
 		uninterrupt_program: (state) => {
 			state.interrupted = false;
+			state.running = true;
 		},
 
 		replace_scope_path: (state, { payload }: { payload: string }) => {
@@ -99,6 +110,27 @@ const interpreterSlice = createSlice({
 		add_instruction: (state, { payload }: { payload: CommandI }) => {
 			state.executable.push(payload);
 		},
+		enter_debug_mode: (state) => {
+			state.debug = true;
+		},
+		exit_debug_mode: (state) => {
+			state.debug = false;
+			state.running = false;
+			state.interrupted = true;
+		},
+		run_executables: (state) => {
+			state.running = true;
+		},
+
+		change_run_state: (
+			state,
+			{ payload }: { payload: "normal" | "timed" | "step" }
+		) => {
+			state.running_state = payload;
+		},
+		set_time: (state, { payload }: { payload: number }) => {
+			state.execution_time = payload;
+		},
 	},
 });
 
@@ -115,5 +147,10 @@ export const {
 	add_scope_path,
 	exit_scope,
 	add_instruction,
+	enter_debug_mode,
+	exit_debug_mode,
+	run_executables,
+	change_run_state,
+	set_time,
 } = interpreterSlice.actions;
 export default interpreterSlice.reducer;

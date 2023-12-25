@@ -1,6 +1,6 @@
 "use client";
 import tabs, { ITab, addTab, closeTab } from "@/redux/reducers/tabs";
-import { useEffect,  useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	IoMdArrowDropright,
 	IoMdArrowDropdown,
@@ -20,7 +20,10 @@ import { join, basename } from "path";
 
 export default function PrimarySideBar() {
 	return (
-		<div className="flex flex-col w-72 border-r border-r-black bg-zinc-900">
+		<div
+			className="flex flex-col w-1/5 border-r border-r-black bg-zinc-900"
+			style={{ minWidth: "12rem" }}
+		>
 			<div className="flex flex-row h-8 items-center pl-2 text-xs text-white">
 				PROJECT
 			</div>
