@@ -47,7 +47,7 @@ export default function SecondarySideBar() {
 								{val?.name}
 							</div>
 							<div className="flex text-sm text-purple-400 border-l-0 font-semibold border pl-2 pr-2 w-1/2 overflow-hidden">
-								<span className="self-center"> {val?.value}</span>
+								<span className="self-center"> {val?.value + ''}</span>
 							</div>
 						</div>
 					))}
