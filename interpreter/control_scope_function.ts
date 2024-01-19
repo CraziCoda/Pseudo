@@ -119,6 +119,8 @@ export function jmp_to_loop_start(args: string) {
 
 export function jmp_for(args: string) {
 	args = args.trim();
+	if (!/step(?=.*)/i.test(args)) args += "step 1";
+
 	const initial = place_in_variables(
 		args.match(/(?<=\=\s*).*(?=to)/i)?.[0] as string
 	);
@@ -127,6 +129,7 @@ export function jmp_for(args: string) {
 	const dest = place_in_variables(
 		args.match(/(?<=to\s*).*(?=step)/i)?.[0] as string
 	);
+
 	args = args.replace(/(?<=to\s*).*(?=step)/i, dest);
 
 	const move = place_in_variables(args.match(/(?<=step\s*).*/i)?.[0] as string);
@@ -149,17 +152,30 @@ export function jmp_for(args: string) {
 
 		const pseudo_var = current_variables.find((val) => val.name == identifier);
 
-		const end = args.match(/(?<=to\s*)[+-]?\d+[.]?\d*/i)?.[0] as string;
+		const to = args
+			.trim()
+			.match(/(?<=to\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0]
+			.replace(/\s*/g, "") as string;
 
-		if (pseudo_var?.value == parseFloat(end)) {
+		const step = args
+			.trim()
+			.match(/(?<=step\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0] as string;
+
+		const direction = parseFloat(step) >= 0 ? "right" : "left";
+
+		const go_right =
+			pseudo_var?.value <= parseFloat(to) && direction == "right";
+		const go_left = pseudo_var?.value >= parseFloat(to) && direction == "left";
+
+		if (!(go_left || go_right)) {
 			const current_scope =
 				store.getState().interpreter.executable[program_counter].scope;
 
 			const instructions = store.getState().interpreter.executable;
 
-			for (let i = 0; i < instructions.length; i++) {
+			for (let i = program_counter; i < instructions.length; i++) {
 				if (!instructions[i].scope.includes(current_scope)) {
-					store.dispatch(move_program_counter(i + 1));
+					store.dispatch(move_program_counter(i));
 					break;
 				}
 			}
@@ -177,12 +193,13 @@ export function jmp_to_for_start(args: string) {
 	const current_variables = store.getState().interpreter.variables;
 
 	for (let i = program_counter; i >= 0; i--) {
-		const prev_scope = instructions[i - 1]?.scope || "a";
-
+		const prev_scope = instructions[i - 1]?.scope || "global";
 		if (!prev_scope.includes(current_scope)) {
+			console.log();
 			const for_instruction = instructions[i];
 			const identifier = for_instruction.args.trim().match(/^[a-zA-Z]\w*/)?.[0];
 			args = for_instruction.args;
+			if (!/step(?=.*)/i.test(args)) args += "step 1";
 
 			// place in variables
 
@@ -199,58 +216,48 @@ export function jmp_to_for_start(args: string) {
 			);
 			args = args.replace(/(?<=step\s*).*/i, move);
 
-			const step = args
-				.trim()
-				.match(/(?<=step\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0] as string;
-
 			const to = args
 				.trim()
 				.match(/(?<=to\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0]
 				.replace(/\s*/g, "") as string;
 
-			const from = args
+			const step = args
 				.trim()
-				.match(/(?<=\=\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0]
-				.replace(/\s*/g, "") as string;
+				.match(/(?<=step\s*)[\-+]?\s*\d+[.]?\d*/i)?.[0] as string;
+
+			const direction = parseFloat(step) >= 0 ? "right" : "left";
 
 			const pseudo_var = current_variables.find(
 				(val) => val.name == identifier
 			);
 
-			const direction = parseFloat(to) > parseFloat(from) ? "right" : "left";
+			const new_value =
+				pseudo_var?.value + parseFloat(step.replace(/\s*/g, ""));
 
-			if (
-				(pseudo_var?.value < parseFloat(to) && direction == "right") ||
-				(pseudo_var?.value > parseFloat(to) && direction == "left")
-			) {
-				const new_value =
-					pseudo_var?.value + parseFloat(step.replace(/\s*/g, ""));
+			const go_right = new_value <= parseFloat(to) && direction == "right";
+			const go_left = new_value >= parseFloat(to) && direction == "left";
 
+			if (go_right || go_left) {
 				assign_var(pseudo_var?.name as string, new_value);
-
 				store.dispatch(move_program_counter(i));
-			} else {
-				// raise error
-				// console.log(pseudo_var);
 			}
-
 			break;
 		}
 	}
+
 }
 
 export function jmp_to_do_start(args: string) {
 	const scope = args.trim().match(/global.*$/)?.[0] as string;
 	const eq = args.trim().replace(scope, "");
-    
-    if(eq == ''){
-        return generic_error("Expected a condition")
-    }
+
+	if (eq == "") {
+		return generic_error("Expected a condition");
+	}
 	const op_ans = place_in_variables(eq);
 	const program_counter = store.getState().interpreter.program_counter;
 
-
-    console.log(program_counter, eq)
+	console.log(program_counter, eq);
 
 	const cond = op_ans == "false" || op_ans == "0" ? false : true;
 

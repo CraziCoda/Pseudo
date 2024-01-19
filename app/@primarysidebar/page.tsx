@@ -16,7 +16,7 @@ import {
 	open_folder,
 } from "@/functions/folder";
 import { IFolderSlice, set_files, set_folder } from "@/redux/reducers/folders";
-import { join, basename } from "path";
+import { join, basename, dirname } from "path";
 
 export default function PrimarySideBar() {
 	return (
@@ -117,13 +117,18 @@ function Project() {
 		}
 	}
 
+    function get_folder_name(path: string){
+        let arr = path.split(/[\/\\]/g)
+        return arr[arr.length -1]
+    }
+
 	return (
 		<div className="flex flex-col cursor-pointer select-none text-white text-sm">
 			{folder.path ? (
 				<>
-					<div className="flex flex-row justify-between items-center  ml-2 mr-2">
+					<div className="flex flex-row justify-between items-center w-full ml-2 mr-2">
 						<div
-							className="flex flex-row items-center"
+							className="flex flex-row items-center w-2/3 overflow-hidden"
 							onClick={() => setShowList(!showList)}
 						>
 							{showList ? (
@@ -133,11 +138,11 @@ function Project() {
 							)}
 
 							<span className="font-semibold text-base">
-								{basename(folder.path || "")}
+								{get_folder_name(folder.path || "")}
 							</span>
 						</div>
 
-						<div className="flex flex-row items-center">
+						<div className="flex flex-row items-center w-1/3 justify-center">
 							<span className="flex flex-row justify-center items-center mr-2 cursor-pointer hover:bg-zinc-700 h-4 w-4">
 								<IoMdAdd
 									size={20}

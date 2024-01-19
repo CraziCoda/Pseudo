@@ -42,7 +42,7 @@ fn main() {
     );
 
     let menu = Menu::new()
-        .add_native_item(MenuItem::Copy)
+        // .add_native_item(MenuItem::Copy)
         .add_submenu(file_submenu)
         .add_item(CustomMenuItem::new("settings".to_string(), "Settings"));
 

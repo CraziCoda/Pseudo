@@ -22,6 +22,7 @@ import {
 	run_executables,
 	uninterrupt_program,
 } from "@/redux/reducers/interpreter";
+import { end_program } from "./useful_functions";
 
 interface token_info {
 	type: "keyword" | "identifier" | "operation";
@@ -46,6 +47,7 @@ export type pseudo_actions =
 	| "enddo"
 	| "until"
 	| "startrepeat"
+	| "exit"
 	| "";
 
 export interface CommandI {
@@ -119,6 +121,7 @@ export const pseudo_keywords = [
 	"do",
 	"repeat",
 	"until",
+    'exit',
 	...pseudo_data_type,
 ];
 
@@ -258,8 +261,12 @@ export function select_function(action: pseudo_actions, args: string) {
 			jmp_to_do_start(args);
 			// console.log(args);
 			break;
+        case "exit":
+                console.log("Exit")
+                end_program()
+                break;
 		default:
-			console.log("Nothing changed");
+			// console.log("Nothing changed");
 			break;
 	}
 

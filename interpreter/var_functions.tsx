@@ -210,11 +210,11 @@ function detect_data_type(data: string): data_type_t | null {
 }
 
 export function place_in_variables(operation: string): string {
-	const op_spaced = operation.replace(
+	const op_spaced = operation?.replace(
 		/([^\w"']+|["][^"]*["]|['][^']*['])/g,
 		" $1 "
 	);
-	const op_values = op_spaced.match(/["][^"]*["]|['][^']*[']|[^\s]+/g);
+	const op_values = op_spaced?.match(/["][^"]*["]|['][^']*[']|[^\s]+/g);
 
 	if (op_values == null) return "";
 

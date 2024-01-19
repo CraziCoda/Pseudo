@@ -5,6 +5,9 @@ import {
 	string_regex,
 } from "./program";
 import generic_error from "./error_functions";
+import store from "../redux/store/app";
+import { interrupt_program, move_program_counter } from "@/redux/reducers/interpreter";
+import { pause_terminal } from "@/redux/reducers/terminal";
 
 export function match_string_between_two_characters(
 	text: string,
@@ -45,6 +48,8 @@ export function work_on_operations(operation: string) {
 	}
 
 	if (get_all_special_characters(operation)) return "";
+
+	if (!validate_operations(operation)) return "";
 
 	const final_op = get_brackets_values(operation);
 	// console.log("Final:", final_op);
@@ -94,11 +99,12 @@ function first_precendence(op: string) {
 		if (/!true|!false/.test(op)) {
 			op = op.replace(/!true/i, "false");
 			op = op.replace(/!false/i, "true");
-		} else {
-			// raise error
-			generic_error(`Expected a true or false after !: ${op}`);
-			return "";
 		}
+		// } else {
+		// 	// raise error
+		// 	generic_error(`Expected a true or false after !: ${op}`);
+		// 	return "";
+		// }
 	}
 	op = second_precedence(op);
 	return op;
@@ -306,7 +312,7 @@ function fourth_precedence(op: string) {
 	}
 
 	if (/[<>][=]?/.test(op_copy)) {
-		console.log("here");
+		// console.log("here");
 		generic_error(`Invalid operation: ${op}`);
 		return "";
 	}
@@ -452,4 +458,20 @@ function get_all_special_characters(op: string) {
 		return true;
 	}
 	return false;
+}
+
+function validate_operations(op: string) {
+	// using = instead of ==
+	if (/(?<![><=!])=(?=[^=])/.test(op)) {
+		generic_error(`Use == for equal to instead of = in ${op}`);
+		return false;
+	}
+	return true;
+}
+
+
+export function end_program(){
+    store.dispatch(interrupt_program());
+	store.dispatch(move_program_counter(0));
+	store.dispatch(pause_terminal());
 }

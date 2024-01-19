@@ -54,6 +54,12 @@ function format_lines(line: string) {
 		/(integer|float|string|double|bool|boolean|char)s/i,
 		"$1"
 	);
+    
+    new_line = new_line?.replace(/^end\s*if/i, "endif");
+    new_line = new_line?.replace(/^end\s*for/i, "endfor");
+    new_line = new_line?.replace(/^end\s*while/i, "endwhile");
+
+    // console.log(new_line)
 
 	return new_line;
 }
@@ -150,7 +156,15 @@ function decode_instruction(line: string, index: number) {
 					line: index + 1,
 					scope: store.getState().interpreter.scope_path.join("/"),
 				});
-			} else {
+			} else if(first_token.toLowerCase() == 'exit' ){
+                commands.push({
+					operation: 'exit',
+					args: '',
+					line: index + 1,
+					scope: store.getState().interpreter.scope_path.join("/"),
+				});
+            }
+             else {
 				const first_token = line.match(/^[a-zA-Z_]\w*/)?.[0] as string;
 
 				const k_type = get_keyword_type(first_token);
@@ -163,6 +177,7 @@ function decode_instruction(line: string, index: number) {
 					line: index + 1,
 					scope: store.getState().interpreter.scope_path.join("/"),
 				});
+
 			}
 		} else if (identifier_regex.test(first_token)) {
 			const second_token = line?.split(" ")[1];
