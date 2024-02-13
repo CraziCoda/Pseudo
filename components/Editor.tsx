@@ -36,7 +36,7 @@ export default function CodeEditor() {
 	}
 
 	function handleEditorWillMount(
-		monaco: typeof import("/home/killcode/Documents/projects/pseudo/node_modules/monaco-editor/esm/vs/editor/editor.api")
+		monaco: typeof import("../node_modules/monaco-editor/esm/vs/editor/editor.api")
 	) {
 		// console.log("Will mount");
 

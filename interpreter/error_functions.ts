@@ -11,7 +11,7 @@ export default function generic_error(msg: string) {
 
 	const program_counter = interpreter.program_counter;
 
-	if (program_counter == 0) return;
+	// if (program_counter == 0) return;
 
 	// console.log(interpreter.executable, program_counter);
 

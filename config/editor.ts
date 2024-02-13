@@ -3,7 +3,7 @@ import { pseudo_keywords } from "@/interpreter/program";
 import type {
 	languages,
 	editor,
-} from "/home/killcode/Documents/projects/pseudo/node_modules/monaco-editor/esm/vs/editor/editor.api.d.ts";
+} from "../node_modules/monaco-editor/esm/vs/editor/editor.api.d.ts";
 
 export const lang_tokens: languages.IMonarchLanguage = {
 	keywords: pseudo_keywords,
@@ -40,6 +40,6 @@ export const editor_theme: editor.IStandaloneThemeData = {
 };
 
 type monaco =
-	typeof import("/home/killcode/Documents/projects/pseudo/node_modules/monaco-editor/esm/vs/editor/editor.api");
+	typeof import("../node_modules/monaco-editor/esm/vs/editor/editor.api");
 
 export function add_editor_commands(monaco: monaco) {}
