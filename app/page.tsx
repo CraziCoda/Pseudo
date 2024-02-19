@@ -52,9 +52,13 @@ export default function Main() {
 	}
 
 	useEffect(() => {
-		const file_path = tabs.tabs[tabs.active].path;
-		handle_read_file(file_path);
-		// console.log(tabs.tabs[tabs.active]);
+		const currentContent = tabs.tabs[tabs.active].content
+
+		if (!currentContent) {
+			const file_path = tabs.tabs[tabs.active].path;
+			handle_read_file(file_path);
+		}
+
 	}, [tabs.active]);
 
 	return (
