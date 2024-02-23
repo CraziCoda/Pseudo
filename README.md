@@ -1,6 +1,6 @@
 ## PSEUDO: Your Simplified Programming Environment
 
-[![App Window](https://github.com/CraziCoda/Pseudo/blob/master/assets/app_win.jpg?raw=true)](https://github.com/CraziCoda/Pseudo/blob/master/assets/app_win.jpg?raw=true)
+[![App Window](https://github.com/CraziCoda/Pseudo/blob/master/assets/app_win.jpeg?raw=true)](https://github.com/CraziCoda/Pseudo/blob/master/assets/app_win.jpeg?raw=true)
 
 Pseudo is a Simplified Programming Environment designed to help you learn the essential building blocks of coding. Whether you're a novice programmer or brushing up on your basics, Pseudo is your ideal launchpad to explore the exciting world of programming.
 
