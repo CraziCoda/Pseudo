@@ -28,7 +28,7 @@ Pseudo is a Simplified Programming Environment designed to help you learn the es
 4. **Create a File:** Give your new program a name ending in _.psc_.
 5. **Start Coding:** Type your code and click "Run" to execute it.
 
-## Programming Features
+## Programming Features 
 
 Pseudo provides a range of essential functionalities to guide your learning:
 
