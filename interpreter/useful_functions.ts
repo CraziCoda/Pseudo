@@ -462,7 +462,9 @@ function get_all_special_characters(op: string) {
 
 function validate_operations(op: string) {
 	// using = instead of ==
-	if (/(?<![><=!])=(?=[^=])/.test(op)) {
+    // ([^><=!])=([^=])
+    // (?<![><=!])=(?=[^=])
+	if (/([^><=!])=([^=])/.test(op)) {
 		generic_error(`Use == for equal to instead of = in ${op}`);
 		return false;
 	}
