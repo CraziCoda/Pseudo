@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev",
+		"dev": "next dev --turbo",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
@@ -20,9 +20,9 @@
 		"@types/react-dom": "18.2.4",
 		"lodash": "^4.17.21",
 		"monaco-editor": "^0.43.0",
-		"next": "^13.5.6",
-		"react": "18.2.0",
-		"react-dom": "18.2.0",
+		"next": "^14.1.1",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
 		"react-icons": "^4.11.0",
 		"react-redux": "^8.1.2",
 		"redux": "^4.2.1"
@@ -31,7 +31,7 @@
 		"@tauri-apps/cli": "^1.5.0",
 		"autoprefixer": "^10.4.16",
 		"eslint": "^8.56.0",
-		"eslint-config-next": "^14.0.4",
+		"eslint-config-next": "^14.1.1",
 		"postcss": "^8.4.32",
 		"tailwindcss": "^3.4.0",
 		"typescript": "^5.3.3"
