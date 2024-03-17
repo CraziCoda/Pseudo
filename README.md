@@ -35,7 +35,7 @@ Pseudo provides a range of essential functionalities to guide your learning:
 
 Explore pre-made programs demonstrating practical applications of each feature. These examples offer valuable insights and connect theory to practice.
 
-[Pseudo Examples](https://github.com/CraziCoda/Pseudo/tree/master/examples)
+[Pseudo Examples](./examples)
 
 ## Happy Coding!
 
